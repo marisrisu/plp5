@@ -115,13 +115,198 @@ typedef struct tabla_simbolos_t
 
 %%
 //AQUI LAS REGLAS
-S : Import class_ {};
+S : Import class_ {
+							int tk = yylex();
+                           if (tk != 0) yyerror("");
+                           cout << $2.cod << endl;
+};
 
-Import : Import import_ SecImp pyc_ {}
-	   : | {};
+Import : Import import_ SecImp pyc_ {
+	
+}
+	    | {
 
-SecImp : SecImp punto_ id {}
-	   : | SecImp punto_ Scanner_ {};
+	   };
+
+SecImp : SecImp punto_ id {
+	
+}
+	    | SecImp punto_ scanner_ {
+
+	   }
+	    | id {
+
+	   };
+
+Class : public_ class_ id llavei_ Main llaved_ {
+	
+};
+
+Main : public_ static_ void_ main_ pari_ string_ cori_ cord_ id pard_ Bloque {
+	
+};
+
+Tipo : int_ {
+	
+}
+	  | double_ {
+
+	 }
+	  | boolean_ {
+
+	 };
+
+Bloque : llavei_ BDecl SeqInstr llaved_ {
+	
+};
+
+BDecl : BDecl DVar {
+	
+}
+	   | {
+
+	  };
+
+DVar : Tipo LIdent pyc_ {
+	
+}
+	  | Tipo DimSN id asig_ new_ Tipo Dimensiones pyc_ {
+
+	 }
+	  | scanner_ id asig_ new_ scanner_ pari_ system_ punto_ in_ pard_ pyc_ {
+
+	 };
+
+DimSN : DimSN cori_ cord_ {
+	
+}
+	   | cori_ cord_ {
+
+	  };
+
+Dimensiones : cori_ nentero cord_ Dimensiones {
+	
+}
+			 | cori_ nentero cord_ {
+
+			};
+
+LIdent : LIdent coma_ Variable {
+	
+}
+	   | Variable {
+
+	   };
+
+Variable : id {
+	
+};
+
+SeqInstr : SeqInstr Instr {
+	
+}
+		  | {
+
+		 };
+
+Instr : pyc_ {
+	
+}
+	  | Bloque {
+
+	  }
+	  | Ref asig_ Expr pyc_ {
+
+	  }
+	  | system_ punto_ out_ punto_ println_ pari_ Expr pard_ pyc_ {
+
+	  }
+	  | system_ punto_ out_ punto_ print_ pari_ Expr pard_ pyc_ {
+
+	  }
+	  | if_ pari_ Expr pard_ Instr {
+
+	  }
+	  | if_ pari_ Expr pard_ Instr else_ Instr {
+
+	  }
+	  | while_ pari_ Expr pard_ Instr {
+
+	  };
+
+Expr : Expr or_ EConj {
+	
+}
+	 | EConj {
+
+	 };
+
+EConj : EConj and_ ERel {
+	
+}
+	  | ERel {
+
+	  };
+
+ERel : Esimple relop_ Esimple {
+	
+}
+	 | Esimple {
+
+	 };
+
+Esimple : Esimple addop_ Term {
+	
+}
+		| Term {
+
+		};
+
+Term : Term mulop_ Factor {
+	
+}
+	 | Factor {
+
+	 };
+
+Factor : Ref {
+	
+}
+	   | id punto_ nextInt_ pari_ pard_ {
+
+	   }
+	   | id punto_ nextDouble_ pari_ pard_ {
+
+	   }
+	   | nentero {
+
+	   }
+	   | nreal {
+
+	   }
+	   | true_ {
+
+	   }
+	   | false_ {
+
+	   }
+	   | pari_ Expr pard_ {
+
+	   }
+	   | not_ Factor {
+
+	   }
+	   | pari_ Tipo pard_ Expr {
+
+	   };
+
+Ref : id {
+	
+}
+	 | Ref cori_ Esimple cord_ {
+	 	
+	};
+	
 %%
 
 //Funcion del profesor
