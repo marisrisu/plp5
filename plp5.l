@@ -36,12 +36,6 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 [\t]               {ncol++;}
 [\n]               {nlin++;ncol=1;}
 "//"(.)*           {; /* comentarios de una linea, no hacer nada */} 
-"/*"                    {ncol += strlen(yytext);BEGIN(COMENTARIO);}
-<COMENTARIO>[^/*\n]+    {ncol += strlen(yytext);}
-<COMENTARIO>\n          {nlin++;ncol=1;}
-<COMENTARIO><<EOF>>     {msgError(ERRLEXEOF,-1,-1,"");}
-<COMENTARIO>"*/"        {ncol+=strlen(yytext); BEGIN(INITIAL);}
-<COMENTARIO>[*/]        {ncol += strlen(yytext);}
 
 "boolean"         {return ret(boolean_);}
 "int"             {return ret(int_);}
