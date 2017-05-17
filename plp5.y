@@ -128,27 +128,28 @@ S : Import class_ {
 
 Import : Import import_ SecImp pyc_ {
 	
+	//No hace nada?
 }
 	    | {
-
+	//No hace nada?
 	   };
 
 SecImp : SecImp punto_ id {
-	
+		//No hace nada?
 }
 	    | SecImp punto_ scanner_ {
-
+	//No hace nada?
 	   }
 	    | id {
-
+	//No hace nada?
 	   };
 
 Class : public_ class_ id llavei_ Main llaved_ {
-	
+		//No hace nada?
 };
 
 Main : public_ static_ void_ main_ pari_ string_ cori_ cord_ id pard_ Bloque  {
-	
+		//No hace nada?
 };
 
 Tipo : int_ {
