@@ -71,12 +71,12 @@ extern FILE *yyin;
 int yyerror(char *s);
 
 
-const int ENTERO=1;
-const int REAL=2;
-const int BOOL_ = 3;
-const int FUNCION=4;
-const int CLASE=5;
-const int VARIABLE=6;
+#define ENTERO		1;
+#define REAL		2;
+#define BOOL_		3;
+#define FUNCION		4;
+#define CLASE		5;
+#define VARIABLE	6;
 
 string operador, s1, s2;  // string auxiliares
 
@@ -305,16 +305,28 @@ Factor : Ref {
 
 	   }
 	   | nentero {
-
+	   		tmp 	= NTemp();
+	   		$$.tipo = ENTERO;
+	   		$$.dir 	= tmp;
+	   		$$.cod 	= $1.lexema;
 	   }
 	   | nreal {
-
+	   		tmp 	= NTemp();
+	   		$$.tipo = REAL;
+	   		$$.dir 	= tmp;
+	   		$$.cod 	= $1.lexema;
 	   }
 	   | true_ {
-
+	   		tmp 	= NTemp();
+	   		$$.tipo = BOOL_;
+	   		$$.dir 	= tmp;
+	   		$$.cod 	= 1;
 	   }
 	   | false_ {
-
+	   		tmp 	= NTemp();
+	   		$$.tipo = BOOL_;
+	   		$$.dir 	= tmp;
+	   		$$.cod 	= 0;
 	   }
 	   | pari_ Expr pard_ {
 
