@@ -58,8 +58,11 @@ using namespace std;
 #include "comun.h"
 // variables y funciones del A. Léxico
 extern int ncol,nlin,findefichero;
+int nTempMin = 16000;
+int nTempMax = 16384;
 
-
+int nTempActual = 16000;
+//extern int tmp;
 extern int yylex();
 extern char *yytext;
 extern FILE *yyin;
@@ -70,9 +73,10 @@ int yyerror(char *s);
 
 const int ENTERO=1;
 const int REAL=2;
-const int FUNCION=3;
-const int CLASE=4;
-const int VARIABLE=5;
+const int BOOL_ = 3;
+const int FUNCION=4;
+const int CLASE=5;
+const int VARIABLE=6;
 
 string operador, s1, s2;  // string auxiliares
 
@@ -108,6 +112,7 @@ typedef struct tabla_simbolos_t
 	void crear_ambito(const char* nombre);
 	void destruir_ambito_actual();
 	void destroy();
+	int newTemp();
 	// Variables globales
 	struct tabla_simbolos_t* ambito;
 
@@ -142,17 +147,37 @@ Class : public_ class_ id llavei_ Main llaved_ {
 	
 };
 
-Main : public_ static_ void_ main_ pari_ string_ cori_ cord_ id pard_ Bloque {
+Main : public_ static_ void_ main_ pari_ string_ cori_ cord_ id pard_ Bloque  {
 	
 };
 
 Tipo : int_ {
-	
-}
-	  | double_ {
 
+		int tmp = newTemp();
+		$$.dir = tmp;
+		$$.tipo = ENTERO;
+		$$.nlin = nlin;
+		$$.ncol = ncol;
+		$$.lexema = "entero";
+
+	}
+	  | double_ {
+		
+		int tmp = newTemp();
+		$$.dir = tmp;
+		$$.tipo = REAL;
+		$$.nlin = nlin;
+		$$.ncol = ncol;
+		$$.lexema = "real";
 	 }
 	  | boolean_ {
+
+	  	int tmp = newTemp();
+		$$.dir = tmp;
+		$$.tipo = BOOL_;
+		$$.nlin = nlin;
+		$$.ncol = ncol;
+		$$.lexema = "bool";
 
 	 };
 
@@ -304,7 +329,7 @@ Ref : id {
 	
 }
 	 | Ref cori_ Esimple cord_ {
-	 	
+
 	};
 	
 %%
@@ -411,6 +436,14 @@ void add_simbolo(const char* lexema, const int& tipoS,const int& tipo, const boo
 		//msgError(ERRSEM_LEXEMAEXISTE, nlin, ncol, lexema);
 	}
 	
+}
+
+int newTemp(){
+
+	nTempActual ++; 
+	if(nTempActual >= nTempMax)
+		msgError(ERR_MAXTMP, nlin, ncol, "") ;
+	else return nTempActual;
 }
 
 simbolo_t* buscar_simbolo(const char* lexema)

@@ -9,6 +9,9 @@ typedef struct {
    string cod;
    string prefijo;
    string th;
+   string dir;
+   string dbase;
+
 } MITIPO;
 
 
