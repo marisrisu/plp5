@@ -2,19 +2,19 @@
 %token int_   
 %token double_
 %token main_ 
-%token System_   
+%token system_   
 %token out_
 %token in_
 %token println_
 %token print_
-%token String_
+%token string_
 %token class_
 %token import_
 %token new_
 %token public_
 %token static_
 %token void_
-%token Scanner_
+%token scanner_
 %token nextInt_
 %token nextDouble_
 %token if_
@@ -38,6 +38,9 @@
 %token and_
 %token or_
 %token not_
+%token nentero
+%token nreal
+%token id
 
 %{
 
@@ -112,6 +115,13 @@ typedef struct tabla_simbolos_t
 
 %%
 //AQUI LAS REGLAS
+S : Import class_ {};
+
+Import : Import import_ SecImp pyc_ {}
+	   : | {};
+
+SecImp : SecImp punto_ id {}
+	   : | SecImp punto_ Scanner_ {};
 %%
 
 //Funcion del profesor

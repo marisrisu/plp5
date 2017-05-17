@@ -47,19 +47,19 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 "int"             {return ret(int_);}
 "double"          {return ret(double_);}
 "main"            {return ret(main_);}
-"System"          {return ret(System_);}
+"System"          {return ret(system_);}
 "out"             {return ret(out_);}
 "in"              {return ret(in_);}
 "println"         {return ret(println_);}
 "print"           {return ret(print_);}
-"String"          {return ret(String_);}
+"String"          {return ret(string_);}
 "class"           {return ret(class_);}
 "import"          {return ret(import_);}
 "new"             {return ret(new_);}
 "public"          {return ret(public_);}
 "static"          {return ret(static_);}
 "void"            {return ret(void_);}
-"Scanner"         {return ret(Scanner_);}
+"Scanner"         {return ret(scanner_);}
 "nextInt"         {return ret(nextInt_);}
 "nextDouble"      {return ret(nextDouble_);}
 "if"              {return ret(if_);}
@@ -97,8 +97,8 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 "!"                {return ret(not_);}
 
 {L}({LD})*         {return ret(id);}
-{D}+               {return ret(entero);}
-{D}+(\.){D}+       {return ret(real);}
+{D}+               {return ret(nentero);}
+{D}+(\.){D}+       {return ret(nreal);}
 .                  {msgError(ERRLEXICO,nlin,ncol,yytext);}
 
 %%
