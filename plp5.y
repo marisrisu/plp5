@@ -71,12 +71,6 @@ extern FILE *yyin;
 int yyerror(char *s);
 
 
-#define ENTERO		1;
-#define REAL		2;
-#define BOOL_		3;
-#define FUNCION		4;
-#define CLASE		5;
-#define VARIABLE	6;
 
 string operador, s1, s2;  // string auxiliares
 
@@ -105,14 +99,14 @@ typedef struct tabla_simbolos_t
         std::vector<simbolo_t> simbolos;			
 	}tabla_simbolos;
 
-	void add_simbolo(const char* lexema, const int& tipoS,const int&tipo, const bool& es_var, const std::string& trad, int nlin, int ncol);
+	void add_simbolo(const char* lexema, int tipoS,int tipo, const bool& es_var, const std::string& trad, int nlin, int ncol);
 	simbolo_t* buscar_simbolo(const char* lexema); 
 	bool lexema_existe(const char* lexema);
 	void print_tabla_simbolos();
 	void crear_ambito(const char* nombre);
 	void destruir_ambito_actual();
 	void destroy();
-	int newTemp();
+	int NTemp();
 	// Variables globales
 	struct tabla_simbolos_t* ambito;
 
@@ -120,7 +114,7 @@ typedef struct tabla_simbolos_t
 
 %%
 //AQUI LAS REGLAS
-S : Import class_ {
+S : Import Class {
 							int tk = yylex();
                            if (tk != 0) yyerror("");
                            cout << $2.cod << endl;
@@ -154,9 +148,8 @@ Main : public_ static_ void_ main_ pari_ string_ cori_ cord_ id pard_ Bloque  {
 
 Tipo : int_ {
 
-		int tmp = newTemp();
+		int tmp = NTemp();
 		$$.dir = tmp;
-		$$.tipo = ENTERO;
 		$$.nlin = nlin;
 		$$.ncol = ncol;
 		$$.lexema = "entero";
@@ -164,7 +157,7 @@ Tipo : int_ {
 	}
 	  | double_ {
 		
-		int tmp = newTemp();
+		int tmp = NTemp();
 		$$.dir = tmp;
 		$$.tipo = REAL;
 		$$.nlin = nlin;
@@ -173,7 +166,7 @@ Tipo : int_ {
 	 }
 	  | boolean_ {
 
-	  	int tmp = newTemp();
+	  	int tmp = NTemp();
 		$$.dir = tmp;
 		$$.tipo = BOOL_;
 		$$.nlin = nlin;
@@ -190,7 +183,7 @@ BDecl : BDecl DVar {
 	
 }
 	   | {
-
+	   	$$.cod = "";
 	  };
 
 DVar : Tipo LIdent pyc_ {
@@ -217,15 +210,17 @@ Dimensiones : cori_ nentero cord_ Dimensiones {
 
 			};
 
-LIdent : LIdent coma_ Variable {
+LIdent : LIdent coma_  Variable {
 	
 }
-	   | Variable {
+	   | {$$.tipo = $0.tipo }Variable {
 
 	   };
 
 Variable : id {
-	
+
+	add_simbolo($1.lexema, VARIABLE, $0.tipo, true, $1.lexema, nlin, ncol-strlen(yytext));
+
 };
 
 SeqInstr : SeqInstr Instr {
@@ -305,28 +300,28 @@ Factor : Ref {
 
 	   }
 	   | nentero {
-	   		tmp 	= NTemp();
+	   		int tmp 	= NTemp();
 	   		$$.tipo = ENTERO;
 	   		$$.dir 	= tmp;
 	   		$$.cod 	= $1.lexema;
 	   }
 	   | nreal {
-	   		tmp 	= NTemp();
+	   		int tmp 	= NTemp();
 	   		$$.tipo = REAL;
 	   		$$.dir 	= tmp;
 	   		$$.cod 	= $1.lexema;
 	   }
 	   | true_ {
-	   		tmp 	= NTemp();
+	   		int tmp 	= NTemp();
 	   		$$.tipo = BOOL_;
 	   		$$.dir 	= tmp;
-	   		$$.cod 	= 1;
+	   		$$.cod 	= "0";
 	   }
 	   | false_ {
-	   		tmp 	= NTemp();
+	   		int tmp = NTemp();
 	   		$$.tipo = BOOL_;
 	   		$$.dir 	= tmp;
-	   		$$.cod 	= 0;
+	   		$$.cod 	= "1";
 	   }
 	   | pari_ Expr pard_ {
 
@@ -429,7 +424,7 @@ void crear_ambito(const char* nombre)
 	ambito = nuevo_ambito; 
 }
 
-void add_simbolo(const char* lexema, const int& tipoS,const int& tipo, const bool& es_var, const std::string& trad, int nlin, int ncol)
+void add_simbolo(const char* lexema, int tipoS,int tipo, const bool& es_var, const std::string& trad, int nlin, int ncol)
 {	
 	simbolo_t s;
 	s.lexema = string(lexema);
@@ -451,7 +446,7 @@ void add_simbolo(const char* lexema, const int& tipoS,const int& tipo, const boo
 	
 }
 
-int newTemp(){
+int NTemp(){
 
 	nTempActual ++; 
 	if(nTempActual >= nTempMax)

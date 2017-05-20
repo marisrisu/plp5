@@ -1,5 +1,6 @@
 /*----------------------- comun.h -----------------------------*/
-
+//Maria Luisa Risueño Gonzalez;48673390p
+//Marcos Gonzalez Verdu;
 /* fichero con definciones comunes para los ficheros .l y .y */
 
 typedef struct {
@@ -11,6 +12,7 @@ typedef struct {
    string th;
    string dir;
    string dbase;
+   int tam;
 
 } MITIPO;
 
@@ -44,5 +46,14 @@ typedef struct {
 #define ERR_MAXTIPOS   102
 #define ERR_MAXTMP     103
 
+
+
+#define ENTERO		1
+#define REAL		2
+#define BOOL_		3
+#define ARRAY		4
+#define SCANNER		5
+#define FUNCION		6
+#define VARIABLE	7
 
 void msgError(int nerror,int nlin,int ncol,const char *s);
