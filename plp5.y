@@ -58,9 +58,10 @@ using namespace std;
 #include "comun.h"
 // variables y funciones del A. Léxico
 extern int ncol,nlin,findefichero;
+
 int nTempMin = 16000;
 int nTempMax = 16384;
-
+int nVarActual = 0;
 int nTempActual = 16000;
 //extern int tmp;
 extern int yylex();
@@ -79,9 +80,12 @@ typedef struct simbolo_t
 	   std::string lexema;
 	   int tipoSim;
 	   int tipo;
+	   int dir;
+	   int tam;
 	   bool es_var;
 	   std::string trad;
 	   int lin,col;
+
 	}simbolo;
 
 struct find_simbolo : std::unary_function<simbolo_t, bool>
@@ -98,6 +102,7 @@ typedef struct tabla_simbolos_t
         struct tabla_simbolos_t* ts_padre;
         std::vector<simbolo_t> simbolos;			
 	}tabla_simbolos;
+	void add_simbolo(simbolo_t &s);
 
 	void add_simbolo(const char* lexema, int tipoS,int tipo, const bool& es_var, const std::string& trad, int nlin, int ncol);
 	simbolo_t* buscar_simbolo(const char* lexema); 
@@ -107,6 +112,7 @@ typedef struct tabla_simbolos_t
 	void destruir_ambito_actual();
 	void destroy();
 	int NTemp();
+	int getDir();
 	// Variables globales
 	struct tabla_simbolos_t* ambito;
 
@@ -115,13 +121,14 @@ typedef struct tabla_simbolos_t
 %%
 //AQUI LAS REGLAS
 S : Import Class {
-							int tk = yylex();
-                           if (tk != 0) yyerror("");
-                           cout << $2.cod << endl;
+	$$.cod = $1.cod + $2.cod;
+						int tk = yylex();
+                        if (tk != 0) yyerror("");
+                        cout << $2.cod << endl;
 };
 
 Import : Import import_ SecImp pyc_ {
-	
+	$$.cod = $1.cod + $3.cod;
 	//No hace nada?
 }
 	    | {
@@ -129,9 +136,11 @@ Import : Import import_ SecImp pyc_ {
 	   };
 
 SecImp : SecImp punto_ id {
+	$$.cod = $1.cod;
 		//No hace nada?
 }
 	    | SecImp punto_ scanner_ {
+	    	$$.cod = $1.cod;
 	//No hace nada?
 	   }
 	    | id {
@@ -140,10 +149,12 @@ SecImp : SecImp punto_ id {
 
 Class : public_ class_ id llavei_ Main llaved_ {
 		//No hace nada?
+	$$.cod = $5.cod;
 };
 
 Main : public_ static_ void_ main_ pari_ string_ cori_ cord_ id pard_ Bloque  {
 		//No hace nada?
+	$$.cod = $11.cod;
 };
 
 Tipo : int_ {
@@ -153,6 +164,7 @@ Tipo : int_ {
 		$$.nlin = nlin;
 		$$.ncol = ncol;
 		$$.lexema = "entero";
+		$$.tipo = ENTERO;
 
 	}
 	  | double_ {
@@ -183,12 +195,12 @@ BDecl : BDecl DVar {
 	
 }
 	   | {
-	   	$$.cod = "";
+	  
 	  };
 
-DVar : Tipo LIdent pyc_ {
+DVar : Tipo {$$.tipo = $1.tipo; } LIdent pyc_ {
 	
-}
+	}
 	  | Tipo DimSN id asig_ new_ Tipo Dimensiones pyc_ {
 
 	 }
@@ -210,24 +222,35 @@ Dimensiones : cori_ nentero cord_ Dimensiones {
 
 			};
 
-LIdent : LIdent coma_  Variable {
-	
-}
-	   | {$$.tipo = $0.tipo }Variable {
+LIdent : {$$.tipo = $0.tipo;} LIdent coma_  {$$.tipo = $0.tipo;} Variable {
 
+	
+	}
+	   | {$$.tipo = $0.tipo;} Variable {
+	   		$$ = $1;
 	   };
 
-Variable : id {
+Variable : {$$.tipo = $0.tipo;} id {
 
-	add_simbolo($1.lexema, VARIABLE, $0.tipo, true, $1.lexema, nlin, ncol-strlen(yytext));
+	simbolo_t s;
+	s.lexema = $1.lexema;
+	s.tipoSim = VARIABLE;
+	s.tipo = $0.tipo;
+	s.es_var = true;
+	s.trad = $1.lexema;
+	s.lin = nlin;
+	s.col = ncol-strlen(yytext);
+	s.dir = getDir();
+	s.tam = 1;
+	add_simbolo(s);
 
 };
 
 SeqInstr : SeqInstr Instr {
-	
+	$$.cod = $1.cod + $2.cod;
 }
 		  | {
-
+		  	$$.cod = "";
 		 };
 
 Instr : pyc_ {
@@ -444,6 +467,24 @@ void add_simbolo(const char* lexema, int tipoS,int tipo, const bool& es_var, con
 		//msgError(ERRSEM_LEXEMAEXISTE, nlin, ncol, lexema);
 	}
 	
+}
+void add_simbolo(simbolo_t s)
+{	
+	
+	vector<simbolo_t>::iterator begin_it = ambito->simbolos.begin();
+	vector<simbolo_t>::iterator end_it = ambito->simbolos.end();
+	vector<simbolo_t>::iterator it = std::find_if(begin_it,end_it, find_simbolo(s.lexema)); 
+	if(it == end_it)
+	{
+		ambito->simbolos.push_back(s);
+	}else{
+		//msgError(ERRSEM_LEXEMAEXISTE, nlin, ncol, lexema);
+	}
+	
+}
+int getDir(){
+
+	return 1;
 }
 
 int NTemp(){
