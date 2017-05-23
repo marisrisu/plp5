@@ -122,6 +122,7 @@ typedef struct tabla_simbolos_t
 //AQUI LAS REGLAS
 S : Import Class {
 	$$.cod = $1.cod + $2.cod;
+	print_tabla_simbolos();
 						int tk = yylex();
                         if (tk != 0) yyerror("");
                         cout << $2.cod << endl;
@@ -158,7 +159,6 @@ Main : public_ static_ void_ main_ pari_ string_ cori_ cord_ id pard_ Bloque  {
 };
 
 Tipo : int_ {
-
 		int tmp = NTemp();
 		$$.dir = tmp;
 		$$.nlin = nlin;
@@ -189,16 +189,22 @@ Tipo : int_ {
 
 Bloque : llavei_ BDecl SeqInstr llaved_ {
 	
+	$$.cod = $1.cod;
 };
 
 BDecl : BDecl DVar {
-	
+	$$.cod = $1.cod;
 }
 	   | {
 	  
 	  };
 
 DVar : Tipo {$$.tipo = $1.tipo; } LIdent pyc_ {
+
+	int tmp = NTemp();
+	$$.dir = tmp;
+	$$.tipo = $1.tipo;
+	$$.cod = "mov hola";
 	
 	}
 	  | Tipo DimSN id asig_ new_ Tipo Dimensiones pyc_ {
@@ -224,13 +230,17 @@ Dimensiones : cori_ nentero cord_ Dimensiones {
 
 LIdent : {$$.tipo = $0.tipo;} LIdent coma_  {$$.tipo = $0.tipo;} Variable {
 
-	
+	int tmp = NTemp();
+	$$.dir = tmp;
+print_tabla_simbolos();
 	}
-	   | {$$.tipo = $0.tipo;} Variable {
-	   		$$ = $1;
+	   | Variable {
+	   	$$ = $1;
+
 	   };
 
 Variable : {$$.tipo = $0.tipo;} id {
+
 
 	simbolo_t s;
 	s.lexema = $1.lexema;
@@ -250,7 +260,6 @@ SeqInstr : SeqInstr Instr {
 	$$.cod = $1.cod + $2.cod;
 }
 		  | {
-		  	$$.cod = "";
 		 };
 
 Instr : pyc_ {
@@ -270,16 +279,18 @@ Instr : pyc_ {
 	  }
 	  | if_ pari_ Expr pard_ Instr {
 
+	  	$$.cod = $3.cod + "\nmov " + $3.dir + "A\njz " + $5.dir + "\n" + $5.cod;
 	  }
 	  | if_ pari_ Expr pard_ Instr else_ Instr {
 
+	  	$$.cod = $3.cod + "\nmov " + $3.dir + "A\njz " + $5.dir + "\n" + $5.cod + "\njmp " + $7.dir + $7.cod;
 	  }
 	  | while_ pari_ Expr pard_ Instr {
-
+	  	$$.cod = $3.cod + "mov " + $3.dir + " A\njz " + $5.dir + "\n" + $5.cod + "\njmp " + $3.dir;
 	  };
 
 Expr : Expr or_ EConj {
-	
+
 }
 	 | EConj {
 
@@ -468,7 +479,7 @@ void add_simbolo(const char* lexema, int tipoS,int tipo, const bool& es_var, con
 	}
 	
 }
-void add_simbolo(simbolo_t s)
+void add_simbolo(simbolo_t &s)
 {	
 	
 	vector<simbolo_t>::iterator begin_it = ambito->simbolos.begin();
