@@ -52,6 +52,8 @@
 #include <vector>
 #include <algorithm>
 #include "comun.h"
+#include <sstream>
+
 
 using namespace std;
 
@@ -120,12 +122,20 @@ int getDir();
 // Variables globales
 struct tabla_simbolos_t* ambito;
 
+string IntToString (int a)
+{
+    ostringstream temp;
+    temp<<a;
+    return temp.str();
+}
+
 // tabla simbolos
 std::vector<simbolo_t> simbolos;
 // tabla de tipos
 vector<tipo> tabla_tipos;
 // añadir simbolo a la tabla actual
-void nuevoSimbolo(simbolo_t& s, const int& tipo);
+void nuevoSimbolo(const char* lexema,const int& tipo, const int& dir, const bool& esArray, int idTipo,int nlin,int ncol);
+//void nuevoSimbolo(simbolo_t& s, const int& tipo);
 // recuperar simbolo por lexema (simbolo debe contener lexema al llamar a la funcion)
 bool buscarSimbolo(simbolo_t& simbolo); 
 // True si el simbolo ya esta declarado
@@ -137,9 +147,12 @@ bool buscarTipo(int tipo_buscado, tipo_t& t);
 // Inicializa tabla tipos con los basicos
 void inicializarTablaTipos();
 // añade un tipo array la tabla de tipos
-void nuevoTipo(const int& tipo_base, const int& inicio, const int& fin);
+void nuevoTipo(const int& tam, const int& tipo);
 // Pasa un string a minusculas
 void toLower(string& str);
+
+bool esBase(int tipo);
+
 %}
 
 %%
@@ -187,7 +200,6 @@ Tipo : int_ {
 		$$.dir = tmp;
 		$$.nlin = nlin;
 		$$.ncol = ncol;
-		$$.lexema = "entero";
 		$$.tipo = ENTERO;
 
 	}
@@ -198,7 +210,6 @@ Tipo : int_ {
 		$$.tipo = REAL;
 		$$.nlin = nlin;
 		$$.ncol = ncol;
-		$$.lexema = "real";
 	 }
 	  | boolean_ {
 
@@ -207,7 +218,6 @@ Tipo : int_ {
 		$$.tipo = BOOLEANO;
 		$$.nlin = nlin;
 		$$.ncol = ncol;
-		$$.lexema = "bool";
 
 	 };
 
@@ -225,38 +235,56 @@ BDecl : BDecl DVar {
 
 DVar : Tipo {$$.tipo = $1.tipo; } LIdent pyc_ {
 
-	int tmp = NTemp();
-	$$.dir = tmp;
-	$$.tipo = $1.tipo;
-	$$.cod = "mov hola";
-	
-	}
-	  | Tipo DimSN id asig_ new_ Tipo Dimensiones pyc_ {
+    int tmp = NTemp();
+    $$.dir = tmp;
+    $$.tipo = $1.tipo;
+    
+    }
+    | Tipo DimSN id asig_ new_ Tipo {$$.tipo = $1.tipo} Dimensiones pyc_ {
 
-	 }
-	  | scanner_ id asig_ new_ scanner_ pari_ system_ punto_ in_ pard_ pyc_ {
+      if(esBase($8.tipo))
+      {
+        int tmp = NTemp();
+        $$.dir = tmp;
+        $$.tipo = $1.tipo;
+        nuevoSimbolo($3.lexema,$1.tipo, tmp, true, $8.tipo, nlin, ncol-strlen(yytext));
 
-	 };
+    }else
+    {
+      msgError(ERRDIM, nlin, ncol, "");
+      }
+
+   }
+    | scanner_ id asig_ new_ scanner_ pari_ system_ punto_ in_ pard_ pyc_ {
+
+   };
 
 DimSN : DimSN cori_ cord_ {
-	
+  
 }
-	   | cori_ cord_ {
+     | cori_ cord_ {
 
-	  };
+    };
 
 Dimensiones : cori_ nentero cord_ Dimensiones {
-	
+    
+    int tmp = NTemp();
+    $$.dir = tmp;
+    $$.tipo = $0.tipo;
+    //No hace falta cod porque es una declaración, las operacioens de cod se harán cuando se acceda a lectura de los arrays. NOP?
+    nuevoTipo($2.lexema, $0.tipo);
 }
-			 | cori_ nentero cord_ {
-
-			};
-
+       | cori_ nentero cord_ {
+        int tmp = NTemp();
+        $$.dir = tmp;
+        $$.tipo = $0.tipo;
+        nuevoTipo($2.lexema, $0.tipo);
+      };
 LIdent : {$$.tipo = $0.tipo;} LIdent coma_  {$$.tipo = $0.tipo;} Variable {
 
 	int tmp = NTemp();
 	$$.dir = tmp;
-print_tabla_simbolos();
+	
 	}
 	   | Variable {
 	   	$$ = $1;
@@ -265,15 +293,9 @@ print_tabla_simbolos();
 
 Variable : {$$.tipo = $0.tipo;} id {
 
-
-	simbolo_t s;
-	s.lexema = $1.lexema;
-	s.tipo = VARIABLE;
-	s.esArray = false;
-	s.lin = nlin;
-	s.col = ncol-strlen(yytext);
-	s.dir = getDir();
-	nuevoSimbolo(s);
+	int tmp = NTemp();
+	$$.dir = tmp;
+	nuevoSimbolo($2.lexema,VARIABLE, tmp, false, $0.tipo );
 
 };
 
@@ -300,14 +322,14 @@ Instr : pyc_ {
 	  }
 	  | if_ pari_ Expr pard_ Instr {
 
-	  	$$.cod = $3.cod + "\nmov " + $3.dir + "A\njz " + std::string($5.dir) + "\n" + $5.cod;
+	  	$$.cod = $3.cod + "\nmov " + IntToString($3.dir) + "A\njz " + IntToString($5.dir) + "\n" + $5.cod;
 	  }
 	  | if_ pari_ Expr pard_ Instr else_ Instr {
 
-	  	$$.cod = $3.cod + "\nmov " + std::string($3.dir) + "A\njz " + std::string($5.dir) + "\n" + $5.cod + "\njmp " + std::string($7.dir) + $7.cod;
+	  	$$.cod = $3.cod + "\nmov " + IntToString($3.dir) + "A\njz " + IntToString($5.dir) + "\n" + $5.cod + "\njmp " + IntToString($7.dir) + $7.cod;
 	  }
 	  | while_ pari_ Expr pard_ Instr {
-	  	$$.cod = $3.cod + "mov " + std::string($3.dir) + " A\njz " + std::string($5.dir) + "\n" + $5.cod + "\njmp " + std::string($3.dir);
+	  	$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod + "\njmp " + IntToString($3.dir);
 	  };
 
 Expr : Expr or_ EConj {
@@ -389,13 +411,35 @@ Factor : Ref {
 	   };
 
 Ref : id {
-	
-}
-	 | Ref cori_ Esimple cord_ {
+  
+  //$$.tipo = buscarTipo($1.lexema);
+  int tmp = NTemp();
+  $$.dir = tmp;
+  $$.dBase = buscarDir($1.lexema);
+  $$.cod = "mov #0 " + tmp;
 
-	};
+}
+   | Ref cori_ {if(esBase($1.tipo)) msgError(1,1,1,"");}
+    Esimple cord_ {
+      if(!esBase($4.tipo)){ msgError(ERR_EXP_ENT,1,1,"");}
+      else{
+        $$.tipo = tipoBase($1.tipo);
+        int tmp = NTemp();
+        $$.dir = tmp;
+        $$.dBase = $1.dBase;
+        $$.cod = $1.cod + $4.cod + "mov #" + tamTipo($1.tipo) + "\naddi " + $4.dir + "\nmov A " + tmp;
+      }
+
+  };
+  
 	
 %%
+bool esBase(int tipo)
+{
+  if(tipo <= 3)
+    return true;
+  else return false;
+}
 
 //Funcion del profesor
 void msgError(int nerror,int nlin,int ncol,const char *s)
@@ -478,6 +522,8 @@ void crear_ambito(const char* nombre)
 	nuevo_ambito->nombre = nombre;
 	ambito = nuevo_ambito; 
 }
+
+
 
 void nuevoSimbolo(simbolo_t& simbolo, const int& tipo) { 
 
@@ -657,7 +703,7 @@ void print_tabla_simbolos() {
   std::cout << "###########################################\n";
 }
 
-void nuevoTipo(const int& tipo_base, const int& inicio, const int& fin) {
+void nuevoTipo(const int& tam, const int& tipo_base) {
   tipo_t t;
   switch(tipo_base)
   {
@@ -678,7 +724,7 @@ void nuevoTipo(const int& tipo_base, const int& inicio, const int& fin) {
       break;
   }
   t.tipo    = ARRAY;
-  t.size    = fin-inicio+1;
+  t.size    = tam;
   tabla_tipos.push_back(t);
 }
 
