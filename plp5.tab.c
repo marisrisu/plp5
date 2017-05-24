@@ -72,11 +72,10 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-
+#include "comun.h"
 
 using namespace std;
 
-#include "comun.h"
 // variables y funciones del A. Léxico
 extern int ncol,nlin,findefichero;
 
@@ -93,52 +92,77 @@ extern FILE *yyin;
 int yyerror(char *s);
 
 
+int ptr_mem = 0;
+int ptr_mem_temp = MAX_MEM+1;
+int ptr_label = 0;
 
 string operador, s1, s2;  // string auxiliares
 
-typedef struct simbolo_t
-	{
-	   std::string lexema;
-	   int tipoSim;
-	   int tipo;
-	   int dir;
-	   int tam;
-	   bool es_var;
-	   std::string trad;
-	   int lin,col;
+typedef struct simbolo_t {
+	string 	lexema;
+	int 	tipo;
+	int 	dir;
+	bool 	esArray;
+	int 	idTipo;
+	int 	lin,col;
+}simbolo;
 
-	}simbolo;
+typedef struct tipo_t {
+    int tipo;
+    int size;
+    int tipo_base;
+    tipo_t() : tipo(0), size(0)
+    {}
+}tipo;
 
 struct find_simbolo : std::unary_function<simbolo_t, bool>
-	{
-		std::string lexema;
-		find_simbolo(std::string l):lexema(l){}
-		bool operator()(simbolo_t const& s) const
-		{ return s.lexema == lexema; }
-	};
+{
+	std::string lexema;
+	find_simbolo(std::string l):lexema(l){}
+	bool operator()(simbolo_t const& s) const
+	{ return s.lexema == lexema; }
+};
 
 typedef struct tabla_simbolos_t 
-	{
-		const char* nombre;
-        struct tabla_simbolos_t* ts_padre;
-        std::vector<simbolo_t> simbolos;			
-	}tabla_simbolos;
-	void add_simbolo(simbolo_t &s);
+{
+	const char* nombre;
+	struct tabla_simbolos_t* ts_padre;
+	std::vector<simbolo_t> simbolos;			
+}tabla_simbolos;
 
-	void add_simbolo(const char* lexema, int tipoS,int tipo, const bool& es_var, const std::string& trad, int nlin, int ncol);
-	simbolo_t* buscar_simbolo(const char* lexema); 
-	bool lexema_existe(const char* lexema);
-	void print_tabla_simbolos();
-	void crear_ambito(const char* nombre);
-	void destruir_ambito_actual();
-	void destroy();
-	int NTemp();
-	int getDir();
-	// Variables globales
-	struct tabla_simbolos_t* ambito;
+simbolo_t* buscar_simbolo(const char* lexema); 
+bool lexema_existe(const char* lexema);
+void print_tabla_simbolos();
+void crear_ambito(const char* nombre);
+void destruir_ambito_actual();
+void destroy();
+int NTemp();
+int getDir();
+// Variables globales
+struct tabla_simbolos_t* ambito;
 
+// tabla simbolos
+std::vector<simbolo_t> simbolos;
+// tabla de tipos
+vector<tipo> tabla_tipos;
+// añadir simbolo a la tabla actual
+void nuevoSimbolo(simbolo_t& s, const int& tipo);
+// recuperar simbolo por lexema (simbolo debe contener lexema al llamar a la funcion)
+bool buscarSimbolo(simbolo_t& simbolo); 
+// True si el simbolo ya esta declarado
+bool existeSimbolo(string &simbolo);
 
-#line 142 "plp5.tab.c" /* yacc.c:339  */
+int NTemp();
+// Devuelve el struct de un tipo
+bool buscarTipo(int tipo_buscado, tipo_t& t);
+// Inicializa tabla tipos con los basicos
+void inicializarTablaTipos();
+// añade un tipo array la tabla de tipos
+void nuevoTipo(const int& tipo_base, const int& inicio, const int& fin);
+// Pasa un string a minusculas
+void toLower(string& str);
+
+#line 166 "plp5.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -235,7 +259,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 239 "plp5.tab.c" /* yacc.c:358  */
+#line 263 "plp5.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -537,13 +561,13 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   123,   123,   131,   135,   139,   143,   147,   151,   156,
-     161,   170,   179,   190,   195,   198,   202,   202,   210,   213,
-     217,   220,   224,   227,   231,   231,   231,   237,   242,   242,
-     259,   262,   265,   268,   271,   274,   277,   280,   284,   288,
-     292,   295,   299,   302,   306,   309,   313,   316,   320,   323,
-     327,   330,   333,   336,   342,   348,   354,   360,   363,   366,
-     370,   373
+       0,   147,   147,   155,   159,   163,   167,   171,   175,   180,
+     185,   194,   203,   214,   219,   222,   226,   226,   234,   237,
+     241,   244,   248,   251,   255,   255,   255,   261,   266,   266,
+     280,   283,   286,   289,   292,   295,   298,   301,   305,   309,
+     313,   316,   320,   323,   327,   330,   334,   337,   341,   344,
+     348,   351,   354,   357,   363,   369,   375,   381,   384,   387,
+     391,   394
 };
 #endif
 
@@ -1413,7 +1437,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 123 "plp5.y" /* yacc.c:1646  */
+#line 147 "plp5.y" /* yacc.c:1646  */
     {
 	(yyval).cod = (yyvsp[-1]).cod + (yyvsp[0]).cod;
 	print_tabla_simbolos();
@@ -1421,72 +1445,72 @@ yyreduce:
                         if (tk != 0) yyerror("");
                         cout << (yyvsp[0]).cod << endl;
 }
-#line 1425 "plp5.tab.c" /* yacc.c:1646  */
+#line 1449 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 131 "plp5.y" /* yacc.c:1646  */
+#line 155 "plp5.y" /* yacc.c:1646  */
     {
 	(yyval).cod = (yyvsp[-3]).cod + (yyvsp[-1]).cod;
 	//No hace nada?
 }
-#line 1434 "plp5.tab.c" /* yacc.c:1646  */
+#line 1458 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 135 "plp5.y" /* yacc.c:1646  */
+#line 159 "plp5.y" /* yacc.c:1646  */
     {
 	//No hace nada?
 	   }
-#line 1442 "plp5.tab.c" /* yacc.c:1646  */
+#line 1466 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 139 "plp5.y" /* yacc.c:1646  */
+#line 163 "plp5.y" /* yacc.c:1646  */
     {
 	(yyval).cod = (yyvsp[-2]).cod;
 		//No hace nada?
 }
-#line 1451 "plp5.tab.c" /* yacc.c:1646  */
+#line 1475 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 143 "plp5.y" /* yacc.c:1646  */
+#line 167 "plp5.y" /* yacc.c:1646  */
     {
 	    	(yyval).cod = (yyvsp[-2]).cod;
 	//No hace nada?
 	   }
-#line 1460 "plp5.tab.c" /* yacc.c:1646  */
+#line 1484 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 147 "plp5.y" /* yacc.c:1646  */
+#line 171 "plp5.y" /* yacc.c:1646  */
     {
 	//No hace nada?
 	   }
-#line 1468 "plp5.tab.c" /* yacc.c:1646  */
+#line 1492 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 151 "plp5.y" /* yacc.c:1646  */
+#line 175 "plp5.y" /* yacc.c:1646  */
     {
 		//No hace nada?
 	(yyval).cod = (yyvsp[-1]).cod;
 }
-#line 1477 "plp5.tab.c" /* yacc.c:1646  */
+#line 1501 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 156 "plp5.y" /* yacc.c:1646  */
+#line 180 "plp5.y" /* yacc.c:1646  */
     {
 		//No hace nada?
 	(yyval).cod = (yyvsp[0]).cod;
 }
-#line 1486 "plp5.tab.c" /* yacc.c:1646  */
+#line 1510 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 161 "plp5.y" /* yacc.c:1646  */
+#line 185 "plp5.y" /* yacc.c:1646  */
     {
 		int tmp = NTemp();
 		(yyval).dir = tmp;
@@ -1496,11 +1520,11 @@ yyreduce:
 		(yyval).tipo = ENTERO;
 
 	}
-#line 1500 "plp5.tab.c" /* yacc.c:1646  */
+#line 1524 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 170 "plp5.y" /* yacc.c:1646  */
+#line 194 "plp5.y" /* yacc.c:1646  */
     {
 		
 		int tmp = NTemp();
@@ -1510,57 +1534,57 @@ yyreduce:
 		(yyval).ncol = ncol;
 		(yyval).lexema = "real";
 	 }
-#line 1514 "plp5.tab.c" /* yacc.c:1646  */
+#line 1538 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 179 "plp5.y" /* yacc.c:1646  */
+#line 203 "plp5.y" /* yacc.c:1646  */
     {
 
 	  	int tmp = NTemp();
 		(yyval).dir = tmp;
-		(yyval).tipo = BOOL_;
+		(yyval).tipo = BOOLEANO;
 		(yyval).nlin = nlin;
 		(yyval).ncol = ncol;
 		(yyval).lexema = "bool";
 
 	 }
-#line 1529 "plp5.tab.c" /* yacc.c:1646  */
+#line 1553 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 190 "plp5.y" /* yacc.c:1646  */
+#line 214 "plp5.y" /* yacc.c:1646  */
     {
 	
 	(yyval).cod = (yyvsp[-3]).cod;
 }
-#line 1538 "plp5.tab.c" /* yacc.c:1646  */
+#line 1562 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 195 "plp5.y" /* yacc.c:1646  */
+#line 219 "plp5.y" /* yacc.c:1646  */
     {
 	(yyval).cod = (yyvsp[-1]).cod;
 }
-#line 1546 "plp5.tab.c" /* yacc.c:1646  */
+#line 1570 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 198 "plp5.y" /* yacc.c:1646  */
+#line 222 "plp5.y" /* yacc.c:1646  */
     {
 	  
 	  }
-#line 1554 "plp5.tab.c" /* yacc.c:1646  */
+#line 1578 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 202 "plp5.y" /* yacc.c:1646  */
+#line 226 "plp5.y" /* yacc.c:1646  */
     {(yyval).tipo = (yyvsp[0]).tipo; }
-#line 1560 "plp5.tab.c" /* yacc.c:1646  */
+#line 1584 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 202 "plp5.y" /* yacc.c:1646  */
+#line 226 "plp5.y" /* yacc.c:1646  */
     {
 
 	int tmp = NTemp();
@@ -1569,387 +1593,384 @@ yyreduce:
 	(yyval).cod = "mov hola";
 	
 	}
-#line 1573 "plp5.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 18:
-#line 210 "plp5.y" /* yacc.c:1646  */
-    {
-
-	 }
-#line 1581 "plp5.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 19:
-#line 213 "plp5.y" /* yacc.c:1646  */
-    {
-
-	 }
-#line 1589 "plp5.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 20:
-#line 217 "plp5.y" /* yacc.c:1646  */
-    {
-	
-}
 #line 1597 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
-  case 21:
-#line 220 "plp5.y" /* yacc.c:1646  */
+  case 18:
+#line 234 "plp5.y" /* yacc.c:1646  */
     {
 
-	  }
+	 }
 #line 1605 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
-  case 22:
-#line 224 "plp5.y" /* yacc.c:1646  */
+  case 19:
+#line 237 "plp5.y" /* yacc.c:1646  */
     {
-	
-}
+
+	 }
 #line 1613 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
-  case 23:
-#line 227 "plp5.y" /* yacc.c:1646  */
+  case 20:
+#line 241 "plp5.y" /* yacc.c:1646  */
     {
-
-			}
+	
+}
 #line 1621 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
+  case 21:
+#line 244 "plp5.y" /* yacc.c:1646  */
+    {
+
+	  }
+#line 1629 "plp5.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 22:
+#line 248 "plp5.y" /* yacc.c:1646  */
+    {
+	
+}
+#line 1637 "plp5.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 23:
+#line 251 "plp5.y" /* yacc.c:1646  */
+    {
+
+			}
+#line 1645 "plp5.tab.c" /* yacc.c:1646  */
+    break;
+
   case 24:
-#line 231 "plp5.y" /* yacc.c:1646  */
+#line 255 "plp5.y" /* yacc.c:1646  */
     {(yyval).tipo = (yyvsp[0]).tipo;}
-#line 1627 "plp5.tab.c" /* yacc.c:1646  */
+#line 1651 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 231 "plp5.y" /* yacc.c:1646  */
+#line 255 "plp5.y" /* yacc.c:1646  */
     {(yyval).tipo = (yyvsp[-3]).tipo;}
-#line 1633 "plp5.tab.c" /* yacc.c:1646  */
+#line 1657 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 231 "plp5.y" /* yacc.c:1646  */
+#line 255 "plp5.y" /* yacc.c:1646  */
     {
 
 	int tmp = NTemp();
 	(yyval).dir = tmp;
 print_tabla_simbolos();
 	}
-#line 1644 "plp5.tab.c" /* yacc.c:1646  */
+#line 1668 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 237 "plp5.y" /* yacc.c:1646  */
+#line 261 "plp5.y" /* yacc.c:1646  */
     {
 	   	(yyval) = (yyvsp[0]);
 
 	   }
-#line 1653 "plp5.tab.c" /* yacc.c:1646  */
+#line 1677 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 242 "plp5.y" /* yacc.c:1646  */
+#line 266 "plp5.y" /* yacc.c:1646  */
     {(yyval).tipo = (yyvsp[0]).tipo;}
-#line 1659 "plp5.tab.c" /* yacc.c:1646  */
+#line 1683 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 242 "plp5.y" /* yacc.c:1646  */
+#line 266 "plp5.y" /* yacc.c:1646  */
     {
 
 
 	simbolo_t s;
 	s.lexema = (yyvsp[-1]).lexema;
-	s.tipoSim = VARIABLE;
-	s.tipo = (yyvsp[-2]).tipo;
-	s.es_var = true;
-	s.trad = (yyvsp[-1]).lexema;
+	s.tipo = VARIABLE;
+	s.esArray = false;
 	s.lin = nlin;
 	s.col = ncol-strlen(yytext);
 	s.dir = getDir();
-	s.tam = 1;
-	add_simbolo(s);
+	nuevoSimbolo(s);
 
 }
-#line 1680 "plp5.tab.c" /* yacc.c:1646  */
+#line 1701 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 259 "plp5.y" /* yacc.c:1646  */
+#line 280 "plp5.y" /* yacc.c:1646  */
     {
 	(yyval).cod = (yyvsp[-1]).cod + (yyvsp[0]).cod;
 }
-#line 1688 "plp5.tab.c" /* yacc.c:1646  */
+#line 1709 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 262 "plp5.y" /* yacc.c:1646  */
+#line 283 "plp5.y" /* yacc.c:1646  */
     {
 		 }
-#line 1695 "plp5.tab.c" /* yacc.c:1646  */
+#line 1716 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 265 "plp5.y" /* yacc.c:1646  */
+#line 286 "plp5.y" /* yacc.c:1646  */
     {
 	
 }
-#line 1703 "plp5.tab.c" /* yacc.c:1646  */
+#line 1724 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 268 "plp5.y" /* yacc.c:1646  */
+#line 289 "plp5.y" /* yacc.c:1646  */
     {
 
 	  }
-#line 1711 "plp5.tab.c" /* yacc.c:1646  */
+#line 1732 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 271 "plp5.y" /* yacc.c:1646  */
+#line 292 "plp5.y" /* yacc.c:1646  */
     {
 
 	  }
-#line 1719 "plp5.tab.c" /* yacc.c:1646  */
+#line 1740 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 274 "plp5.y" /* yacc.c:1646  */
-    {
-
-	  }
-#line 1727 "plp5.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 36:
-#line 277 "plp5.y" /* yacc.c:1646  */
-    {
-
-	  }
-#line 1735 "plp5.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 37:
-#line 280 "plp5.y" /* yacc.c:1646  */
-    {
-
-	  	(yyval).cod = (yyvsp[-2]).cod + "\nmov " + (yyvsp[-2]).dir + "A\njz " + (yyvsp[0]).dir + "\n" + (yyvsp[0]).cod;
-	  }
-#line 1744 "plp5.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 38:
-#line 284 "plp5.y" /* yacc.c:1646  */
-    {
-
-	  	(yyval).cod = (yyvsp[-4]).cod + "\nmov " + (yyvsp[-4]).dir + "A\njz " + (yyvsp[-2]).dir + "\n" + (yyvsp[-2]).cod + "\njmp " + (yyvsp[0]).dir + (yyvsp[0]).cod;
-	  }
-#line 1753 "plp5.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 39:
-#line 288 "plp5.y" /* yacc.c:1646  */
-    {
-	  	(yyval).cod = (yyvsp[-2]).cod + "mov " + (yyvsp[-2]).dir + " A\njz " + (yyvsp[0]).dir + "\n" + (yyvsp[0]).cod + "\njmp " + (yyvsp[-2]).dir;
-	  }
-#line 1761 "plp5.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 40:
-#line 292 "plp5.y" /* yacc.c:1646  */
-    {
-	
-}
-#line 1769 "plp5.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 41:
 #line 295 "plp5.y" /* yacc.c:1646  */
     {
 
-	 }
-#line 1777 "plp5.tab.c" /* yacc.c:1646  */
+	  }
+#line 1748 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
-  case 42:
-#line 299 "plp5.y" /* yacc.c:1646  */
-    {
-	
-}
-#line 1785 "plp5.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 43:
-#line 302 "plp5.y" /* yacc.c:1646  */
+  case 36:
+#line 298 "plp5.y" /* yacc.c:1646  */
     {
 
 	  }
-#line 1793 "plp5.tab.c" /* yacc.c:1646  */
+#line 1756 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
-  case 44:
-#line 306 "plp5.y" /* yacc.c:1646  */
+  case 37:
+#line 301 "plp5.y" /* yacc.c:1646  */
     {
-	
-}
-#line 1801 "plp5.tab.c" /* yacc.c:1646  */
+
+	  	(yyval).cod = (yyvsp[-2]).cod + "\nmov " + (yyvsp[-2]).dir + "A\njz " + std::to_string((yyvsp[0]).dir) + "\n" + (yyvsp[0]).cod;
+	  }
+#line 1765 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
-  case 45:
+  case 38:
+#line 305 "plp5.y" /* yacc.c:1646  */
+    {
+
+	  	(yyval).cod = (yyvsp[-4]).cod + "\nmov " + std::to_string((yyvsp[-4]).dir) + "A\njz " + std::to_string((yyvsp[-2]).dir) + "\n" + (yyvsp[-2]).cod + "\njmp " + std::to_string((yyvsp[0]).dir) + (yyvsp[0]).cod;
+	  }
+#line 1774 "plp5.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 39:
 #line 309 "plp5.y" /* yacc.c:1646  */
     {
-
-	 }
-#line 1809 "plp5.tab.c" /* yacc.c:1646  */
+	  	(yyval).cod = (yyvsp[-2]).cod + "mov " + std::to_string((yyvsp[-2]).dir) + " A\njz " + std::to_string((yyvsp[0]).dir) + "\n" + (yyvsp[0]).cod + "\njmp " + std::to_string((yyvsp[-2]).dir);
+	  }
+#line 1782 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
-  case 46:
+  case 40:
 #line 313 "plp5.y" /* yacc.c:1646  */
     {
-	
+
 }
-#line 1817 "plp5.tab.c" /* yacc.c:1646  */
+#line 1790 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
-  case 47:
+  case 41:
 #line 316 "plp5.y" /* yacc.c:1646  */
     {
 
-		}
-#line 1825 "plp5.tab.c" /* yacc.c:1646  */
+	 }
+#line 1798 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
-  case 48:
+  case 42:
 #line 320 "plp5.y" /* yacc.c:1646  */
     {
 	
 }
-#line 1833 "plp5.tab.c" /* yacc.c:1646  */
+#line 1806 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
-  case 49:
+  case 43:
 #line 323 "plp5.y" /* yacc.c:1646  */
     {
 
-	 }
-#line 1841 "plp5.tab.c" /* yacc.c:1646  */
+	  }
+#line 1814 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
-  case 50:
+  case 44:
 #line 327 "plp5.y" /* yacc.c:1646  */
     {
 	
 }
-#line 1849 "plp5.tab.c" /* yacc.c:1646  */
+#line 1822 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
-  case 51:
+  case 45:
 #line 330 "plp5.y" /* yacc.c:1646  */
     {
 
-	   }
-#line 1857 "plp5.tab.c" /* yacc.c:1646  */
+	 }
+#line 1830 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
-  case 52:
-#line 333 "plp5.y" /* yacc.c:1646  */
+  case 46:
+#line 334 "plp5.y" /* yacc.c:1646  */
+    {
+	
+}
+#line 1838 "plp5.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 47:
+#line 337 "plp5.y" /* yacc.c:1646  */
+    {
+
+		}
+#line 1846 "plp5.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 48:
+#line 341 "plp5.y" /* yacc.c:1646  */
+    {
+	
+}
+#line 1854 "plp5.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 49:
+#line 344 "plp5.y" /* yacc.c:1646  */
+    {
+
+	 }
+#line 1862 "plp5.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 50:
+#line 348 "plp5.y" /* yacc.c:1646  */
+    {
+	
+}
+#line 1870 "plp5.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 51:
+#line 351 "plp5.y" /* yacc.c:1646  */
     {
 
 	   }
-#line 1865 "plp5.tab.c" /* yacc.c:1646  */
+#line 1878 "plp5.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 52:
+#line 354 "plp5.y" /* yacc.c:1646  */
+    {
+
+	   }
+#line 1886 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 336 "plp5.y" /* yacc.c:1646  */
+#line 357 "plp5.y" /* yacc.c:1646  */
     {
 	   		int tmp 	= NTemp();
 	   		(yyval).tipo = ENTERO;
 	   		(yyval).dir 	= tmp;
 	   		(yyval).cod 	= (yyvsp[0]).lexema;
 	   }
-#line 1876 "plp5.tab.c" /* yacc.c:1646  */
+#line 1897 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 342 "plp5.y" /* yacc.c:1646  */
+#line 363 "plp5.y" /* yacc.c:1646  */
     {
 	   		int tmp 	= NTemp();
 	   		(yyval).tipo = REAL;
 	   		(yyval).dir 	= tmp;
 	   		(yyval).cod 	= (yyvsp[0]).lexema;
 	   }
-#line 1887 "plp5.tab.c" /* yacc.c:1646  */
+#line 1908 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 348 "plp5.y" /* yacc.c:1646  */
+#line 369 "plp5.y" /* yacc.c:1646  */
     {
 	   		int tmp 	= NTemp();
-	   		(yyval).tipo = BOOL_;
+	   		(yyval).tipo = BOOLEANO;
 	   		(yyval).dir 	= tmp;
 	   		(yyval).cod 	= "0";
 	   }
-#line 1898 "plp5.tab.c" /* yacc.c:1646  */
+#line 1919 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 354 "plp5.y" /* yacc.c:1646  */
+#line 375 "plp5.y" /* yacc.c:1646  */
     {
 	   		int tmp = NTemp();
-	   		(yyval).tipo = BOOL_;
+	   		(yyval).tipo = BOOLEANO;
 	   		(yyval).dir 	= tmp;
 	   		(yyval).cod 	= "1";
 	   }
-#line 1909 "plp5.tab.c" /* yacc.c:1646  */
+#line 1930 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 360 "plp5.y" /* yacc.c:1646  */
+#line 381 "plp5.y" /* yacc.c:1646  */
     {
 
 	   }
-#line 1917 "plp5.tab.c" /* yacc.c:1646  */
+#line 1938 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 363 "plp5.y" /* yacc.c:1646  */
+#line 384 "plp5.y" /* yacc.c:1646  */
     {
 
 	   }
-#line 1925 "plp5.tab.c" /* yacc.c:1646  */
+#line 1946 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 366 "plp5.y" /* yacc.c:1646  */
+#line 387 "plp5.y" /* yacc.c:1646  */
     {
 
 	   }
-#line 1933 "plp5.tab.c" /* yacc.c:1646  */
+#line 1954 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 370 "plp5.y" /* yacc.c:1646  */
+#line 391 "plp5.y" /* yacc.c:1646  */
     {
 	
 }
-#line 1941 "plp5.tab.c" /* yacc.c:1646  */
+#line 1962 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 373 "plp5.y" /* yacc.c:1646  */
+#line 394 "plp5.y" /* yacc.c:1646  */
     {
 
 	}
-#line 1949 "plp5.tab.c" /* yacc.c:1646  */
+#line 1970 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1953 "plp5.tab.c" /* yacc.c:1646  */
+#line 1974 "plp5.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2177,7 +2198,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 377 "plp5.y" /* yacc.c:1906  */
+#line 398 "plp5.y" /* yacc.c:1906  */
 
 
 //Funcion del profesor
@@ -2262,133 +2283,215 @@ void crear_ambito(const char* nombre)
 	ambito = nuevo_ambito; 
 }
 
-void add_simbolo(const char* lexema, int tipoS,int tipo, const bool& es_var, const std::string& trad, int nlin, int ncol)
-{	
-	simbolo_t s;
-	s.lexema = string(lexema);
-	s.tipoSim = tipoS;
-	s.tipo = tipo;
-	s.es_var = es_var;
-	s.trad = trad;
-	s.lin = nlin;
-	s.col = ncol;
-	vector<simbolo_t>::iterator begin_it = ambito->simbolos.begin();
-	vector<simbolo_t>::iterator end_it = ambito->simbolos.end();
-	vector<simbolo_t>::iterator it = std::find_if(begin_it,end_it, find_simbolo(lexema)); 
-	if(it == end_it)
-	{
-		ambito->simbolos.push_back(s);
-	}else{
-		//msgError(ERRSEM_LEXEMAEXISTE, nlin, ncol, lexema);
-	}
-	
-}
-void add_simbolo(simbolo_t &s)
-{	
-	
-	vector<simbolo_t>::iterator begin_it = ambito->simbolos.begin();
-	vector<simbolo_t>::iterator end_it = ambito->simbolos.end();
-	vector<simbolo_t>::iterator it = std::find_if(begin_it,end_it, find_simbolo(s.lexema)); 
-	if(it == end_it)
-	{
-		ambito->simbolos.push_back(s);
-	}else{
-		//msgError(ERRSEM_LEXEMAEXISTE, nlin, ncol, lexema);
-	}
-	
-}
-int getDir(){
+void nuevoSimbolo(simbolo_t& simbolo, const int& tipo) { 
 
+  toLower(simbolo.lexema);
+
+  if(!existeSimbolo(simbolo.lexema))  // Si no existe
+  {
+    simbolo_t s;
+    tipo_t obj_tipo;
+    
+    if(buscarTipo(tipo, obj_tipo))
+    {
+      //s.size = obj_tipo.size;
+    }
+    else
+    {
+      /* CREAR NUEVO TIPO */
+    }
+    
+
+    s.lexema    = simbolo.lexema;
+    s.tipo      = tipo;
+    s.lin       = simbolo.lin;
+    s.col       = simbolo.col;
+    s.dir       = ptr_mem;
+    s.idTipo  = simbolo.idTipo;
+    s.esArray  = simbolo.esArray;
+    // asignamos la relacion del tipo con la tabla de tipos
+    if(!s.esArray){
+      switch(tipo)
+      {
+        case ENTERO: 
+          s.idTipo = 0;
+          break;
+        case REAL:
+          s.idTipo = 1;
+          break;
+        case BOOLEANO:
+          s.idTipo = 2;
+          break;
+        case SCANNER:
+          s.idTipo = 3;
+          break;
+      }     
+    }
+
+
+    ptr_mem += obj_tipo.size;
+
+    if(ptr_mem > MAX_MEM)   // Si no cabe en memoria..
+      msgError(ERR_NOCABE, simbolo.lin, simbolo.col, simbolo.lexema.c_str());    // error, memoria llena  
+
+    simbolos.push_back(s);
+  }
+  else
+    msgError(ERRYADECL, simbolo.lin, simbolo.col, simbolo.lexema.c_str());   // Error, simbolo ya declarado
+  
+}
+
+bool existeSimbolo(string& simbolo) {
+  toLower(simbolo);
+  std::vector<simbolo_t>::iterator begin_it = simbolos.begin();
+  std::vector<simbolo_t>::iterator end_it   = simbolos.end();
+  std::vector<simbolo_t>::iterator it       = std::find_if(begin_it,end_it, find_simbolo(simbolo)); 
+
+  return it != end_it;
+}
+
+bool buscarSimbolo(simbolo_t& simbolo) {    // simbolo debe llegar con el lexema y volvera con todos los atributos
+  toLower(simbolo.lexema);
+  std::vector<simbolo_t>::iterator begin_it = simbolos.begin();
+  std::vector<simbolo_t>::iterator end_it   = simbolos.end();
+  std::vector<simbolo_t>::iterator it       = std::find_if(begin_it,end_it, find_simbolo(simbolo.lexema)); 
+
+  if(it != end_it)
+  {
+    simbolo.tipo  = it->tipo;
+    simbolo.dir   = it->dir;
+
+    #if DEBUG_MODE
+      cout << "buscarSimbolo --> Dir: " << simbolo.dir << "\tTipo: "<< simbolo.tipo << "\n";
+    #endif
+
+    return true;
+  }
+  return false;
+} 
+
+int getDir() {
 	return 1;
 }
 
 int NTemp(){
-
 	nTempActual ++; 
 	if(nTempActual >= nTempMax)
 		msgError(ERR_MAXTMP, nlin, ncol, "") ;
 	else return nTempActual;
 }
 
-simbolo_t* buscar_simbolo(const char* lexema)
-{
-	simbolo_t *s = (simbolo_t*)malloc(sizeof(struct simbolo_t));
-	bool encontrado = false;
-	tabla_simbolos_t* actual = ambito;
-	vector<simbolo_t>::iterator begin_it, end_it, it;	
-	begin_it = actual->simbolos.begin();
-	end_it = actual->simbolos.end();
-	while(!encontrado)
-	{
-		it = std::find_if(begin_it, end_it, find_simbolo(std::string(lexema))); 
-		if(it != end_it)
-		{
-			encontrado = true;
-			s = &(*it);
-		}else if(actual->ts_padre != NULL)
-		{
-			actual = actual->ts_padre;
-			begin_it = actual->simbolos.begin();
-			end_it = actual->simbolos.end();
-		}else{
-			s = NULL;
-			break;
-		}
-	}
-	return s;
-} 
+bool buscarTipo(int tipo_buscado, tipo_t& t) {
+  std::vector<tipo_t>::iterator it_tipos;
 
-bool lexema_existe(const char* lexema)
-{
-	bool existe = false;
-	tabla_simbolos_t* actual = ambito;
-	vector<simbolo_t>::iterator begin_it, end_it, it;
-	begin_it = actual->simbolos.begin();
-	end_it = actual->simbolos.end();
-	while(!existe)
-	{
-		it = std::find_if(begin_it, end_it, find_simbolo(std::string(lexema))); 
-		if(it != end_it)
-		{
-			existe = true;
-		}else if(actual->ts_padre != NULL)
-		{
-			actual = actual->ts_padre;
-			begin_it = actual->simbolos.begin();
-			end_it = actual->simbolos.end();
-		}else{
-			break;
-		}
-	}
-	return existe;
+#if DEBUG_MODE == 2
+  cout << "Buscando tipo " << tipo_buscado << "...\n";
+#endif
+
+  for(it_tipos = tabla_tipos.begin(); it_tipos != tabla_tipos.end(); ++it_tipos)
+  {
+    if(it_tipos->tipo == tipo_buscado)
+    {
+      t.tipo      = it_tipos->tipo;
+      t.size      = it_tipos->size;
+      t.tipo_base = it_tipos->tipo_base;
+
+      return true;
+    }
+  }
+  return false;
 }
 
-void print_tabla_simbolos()
+void inicializarTablaTipos() {
+  tipo_t t;
+  tabla_tipos.clear();
+
+  t.tipo      = ENTERO;
+  t.size      = TAM_ENTERO;
+  t.tipo_base = -1;
+  tabla_tipos.push_back(t);
+
+  t.tipo      = REAL;
+  t.size      = TAM_REAL;
+  t.tipo_base = -1;
+  tabla_tipos.push_back(t);
+
+  t.tipo      = BOOLEANO;
+  t.size      = TAM_BOOLEANO;
+  t.tipo_base = -1;
+  tabla_tipos.push_back(t);
+
+  t.tipo      = SCANNER;
+  t.size      = TAM_SCANNER;
+  t.tipo_base = -1;
+  tabla_tipos.push_back(t);
+}
+
+void print_tabla_tipos() {
+  std::vector<tipo_t>::iterator it_tipos;
+  int pos = 0;
+  std::cout << "############ TABLA DE TIPOS ############\n";
+
+  for(it_tipos = tabla_tipos.begin(); it_tipos != tabla_tipos.end(); ++it_tipos)
+  {
+    cout << "Pos: " << pos << 
+            "\tTipo: " << it_tipos->tipo << 
+            "\tTam: " << it_tipos->size <<
+            "\tT.Base: " << it_tipos->tipo_base << "\n";
+    ++pos;
+  }
+  std::cout << "########################################\n";
+
+}
+
+void print_tabla_simbolos() {
+  std::cout << "############ TABLA DE SIMBOLOS ############\n";
+  std::vector<simbolo_t>::iterator it_simbolos;
+  int pos = 0;
+  for(it_simbolos = simbolos.begin(); it_simbolos != simbolos.end(); ++it_simbolos)
+  {
+    cout << "Pos.: " << pos << 
+    "\tSimbolo: " << it_simbolos->lexema << 
+    "\tTipo: " << it_simbolos->tipo << 
+    "\tIdx.Tipo: " << it_simbolos->idTipo << 
+    "\tDir.: " << it_simbolos->dir <<
+    "\tArray? " << it_simbolos->esArray << "\n";
+    ++pos;
+  }
+  std::cout << "###########################################\n";
+}
+
+void nuevoTipo(const int& tipo_base, const int& inicio, const int& fin) {
+  tipo_t t;
+  switch(tipo_base)
+  {
+    case ENTERO: 
+      t.tipo_base = 0;
+      break;
+    case REAL:
+      t.tipo_base = 1;
+      break;
+    case BOOLEANO:
+      t.tipo_base = 2;
+      break;
+    case SCANNER:
+      t.tipo_base = 3;
+      break;
+    default:
+      t.tipo_base = tipo_base;
+      break;
+  }
+  t.tipo    = ARRAY;
+  t.size    = fin-inicio+1;
+  tabla_tipos.push_back(t);
+}
+
+void toLower(string& str)
 {
-	struct tabla_simbolos_t *actual = ambito;
-	std::cout << "############ TABLA DE SIMBOLOS ############\n";
-	while(actual != NULL)
-	{		
-		std::cout << actual->nombre << ": ";
-		for(unsigned int i=0;i<actual->simbolos.size();i++)
-		{
-			if(actual->simbolos[i].tipo == ENTERO){
-				std::cout << "Integer ";
-			}else if(actual->simbolos[i].tipo == REAL){
-				std::cout << "Double ";
-			}
-			std::cout << actual->simbolos[i].lexema << "(" << actual->simbolos[i].trad << ")";
-			std::cout << ", ";
-		}
-		std::cout << "\n";
-		if(actual->ts_padre != NULL)
-		{
-			actual = actual->ts_padre;
-		}else{
-			break;
-		}
-	}
-	std::cout << "###########################################\n";
+  for(int i = 0; i < str.size(); i++)
+  {
+    str[i] = tolower(str[i]);
+  }
 }
 
 void destruir_ambito_actual()

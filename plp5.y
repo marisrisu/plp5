@@ -51,11 +51,10 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-
+#include "comun.h"
 
 using namespace std;
 
-#include "comun.h"
 // variables y funciones del A. Léxico
 extern int ncol,nlin,findefichero;
 
@@ -72,50 +71,75 @@ extern FILE *yyin;
 int yyerror(char *s);
 
 
+int ptr_mem = 0;
+int ptr_mem_temp = MAX_MEM+1;
+int ptr_label = 0;
 
 string operador, s1, s2;  // string auxiliares
 
-typedef struct simbolo_t
-	{
-	   std::string lexema;
-	   int tipoSim;
-	   int tipo;
-	   int dir;
-	   int tam;
-	   bool es_var;
-	   std::string trad;
-	   int lin,col;
+typedef struct simbolo_t {
+	string 	lexema;
+	int 	tipo;
+	int 	dir;
+	bool 	esArray;
+	int 	idTipo;
+	int 	lin,col;
+}simbolo;
 
-	}simbolo;
+typedef struct tipo_t {
+    int tipo;
+    int size;
+    int tipo_base;
+    tipo_t() : tipo(0), size(0)
+    {}
+}tipo;
 
 struct find_simbolo : std::unary_function<simbolo_t, bool>
-	{
-		std::string lexema;
-		find_simbolo(std::string l):lexema(l){}
-		bool operator()(simbolo_t const& s) const
-		{ return s.lexema == lexema; }
-	};
+{
+	std::string lexema;
+	find_simbolo(std::string l):lexema(l){}
+	bool operator()(simbolo_t const& s) const
+	{ return s.lexema == lexema; }
+};
 
 typedef struct tabla_simbolos_t 
-	{
-		const char* nombre;
-        struct tabla_simbolos_t* ts_padre;
-        std::vector<simbolo_t> simbolos;			
-	}tabla_simbolos;
-	void add_simbolo(simbolo_t &s);
+{
+	const char* nombre;
+	struct tabla_simbolos_t* ts_padre;
+	std::vector<simbolo_t> simbolos;			
+}tabla_simbolos;
 
-	void add_simbolo(const char* lexema, int tipoS,int tipo, const bool& es_var, const std::string& trad, int nlin, int ncol);
-	simbolo_t* buscar_simbolo(const char* lexema); 
-	bool lexema_existe(const char* lexema);
-	void print_tabla_simbolos();
-	void crear_ambito(const char* nombre);
-	void destruir_ambito_actual();
-	void destroy();
-	int NTemp();
-	int getDir();
-	// Variables globales
-	struct tabla_simbolos_t* ambito;
+simbolo_t* buscar_simbolo(const char* lexema); 
+bool lexema_existe(const char* lexema);
+void print_tabla_simbolos();
+void crear_ambito(const char* nombre);
+void destruir_ambito_actual();
+void destroy();
+int NTemp();
+int getDir();
+// Variables globales
+struct tabla_simbolos_t* ambito;
 
+// tabla simbolos
+std::vector<simbolo_t> simbolos;
+// tabla de tipos
+vector<tipo> tabla_tipos;
+// añadir simbolo a la tabla actual
+void nuevoSimbolo(simbolo_t& s, const int& tipo);
+// recuperar simbolo por lexema (simbolo debe contener lexema al llamar a la funcion)
+bool buscarSimbolo(simbolo_t& simbolo); 
+// True si el simbolo ya esta declarado
+bool existeSimbolo(string &simbolo);
+
+int NTemp();
+// Devuelve el struct de un tipo
+bool buscarTipo(int tipo_buscado, tipo_t& t);
+// Inicializa tabla tipos con los basicos
+void inicializarTablaTipos();
+// añade un tipo array la tabla de tipos
+void nuevoTipo(const int& tipo_base, const int& inicio, const int& fin);
+// Pasa un string a minusculas
+void toLower(string& str);
 %}
 
 %%
@@ -180,7 +204,7 @@ Tipo : int_ {
 
 	  	int tmp = NTemp();
 		$$.dir = tmp;
-		$$.tipo = BOOL_;
+		$$.tipo = BOOLEANO;
 		$$.nlin = nlin;
 		$$.ncol = ncol;
 		$$.lexema = "bool";
@@ -244,15 +268,12 @@ Variable : {$$.tipo = $0.tipo;} id {
 
 	simbolo_t s;
 	s.lexema = $1.lexema;
-	s.tipoSim = VARIABLE;
-	s.tipo = $0.tipo;
-	s.es_var = true;
-	s.trad = $1.lexema;
+	s.tipo = VARIABLE;
+	s.esArray = false;
 	s.lin = nlin;
 	s.col = ncol-strlen(yytext);
 	s.dir = getDir();
-	s.tam = 1;
-	add_simbolo(s);
+	nuevoSimbolo(s);
 
 };
 
@@ -279,14 +300,14 @@ Instr : pyc_ {
 	  }
 	  | if_ pari_ Expr pard_ Instr {
 
-	  	$$.cod = $3.cod + "\nmov " + $3.dir + "A\njz " + $5.dir + "\n" + $5.cod;
+	  	$$.cod = $3.cod + "\nmov " + $3.dir + "A\njz " + std::string($5.dir) + "\n" + $5.cod;
 	  }
 	  | if_ pari_ Expr pard_ Instr else_ Instr {
 
-	  	$$.cod = $3.cod + "\nmov " + $3.dir + "A\njz " + $5.dir + "\n" + $5.cod + "\njmp " + $7.dir + $7.cod;
+	  	$$.cod = $3.cod + "\nmov " + std::string($3.dir) + "A\njz " + std::string($5.dir) + "\n" + $5.cod + "\njmp " + std::string($7.dir) + $7.cod;
 	  }
 	  | while_ pari_ Expr pard_ Instr {
-	  	$$.cod = $3.cod + "mov " + $3.dir + " A\njz " + $5.dir + "\n" + $5.cod + "\njmp " + $3.dir;
+	  	$$.cod = $3.cod + "mov " + std::string($3.dir) + " A\njz " + std::string($5.dir) + "\n" + $5.cod + "\njmp " + std::string($3.dir);
 	  };
 
 Expr : Expr or_ EConj {
@@ -347,13 +368,13 @@ Factor : Ref {
 	   }
 	   | true_ {
 	   		int tmp 	= NTemp();
-	   		$$.tipo = BOOL_;
+	   		$$.tipo = BOOLEANO;
 	   		$$.dir 	= tmp;
 	   		$$.cod 	= "0";
 	   }
 	   | false_ {
 	   		int tmp = NTemp();
-	   		$$.tipo = BOOL_;
+	   		$$.tipo = BOOLEANO;
 	   		$$.dir 	= tmp;
 	   		$$.cod 	= "1";
 	   }
@@ -458,133 +479,215 @@ void crear_ambito(const char* nombre)
 	ambito = nuevo_ambito; 
 }
 
-void add_simbolo(const char* lexema, int tipoS,int tipo, const bool& es_var, const std::string& trad, int nlin, int ncol)
-{	
-	simbolo_t s;
-	s.lexema = string(lexema);
-	s.tipoSim = tipoS;
-	s.tipo = tipo;
-	s.es_var = es_var;
-	s.trad = trad;
-	s.lin = nlin;
-	s.col = ncol;
-	vector<simbolo_t>::iterator begin_it = ambito->simbolos.begin();
-	vector<simbolo_t>::iterator end_it = ambito->simbolos.end();
-	vector<simbolo_t>::iterator it = std::find_if(begin_it,end_it, find_simbolo(lexema)); 
-	if(it == end_it)
-	{
-		ambito->simbolos.push_back(s);
-	}else{
-		//msgError(ERRSEM_LEXEMAEXISTE, nlin, ncol, lexema);
-	}
-	
-}
-void add_simbolo(simbolo_t &s)
-{	
-	
-	vector<simbolo_t>::iterator begin_it = ambito->simbolos.begin();
-	vector<simbolo_t>::iterator end_it = ambito->simbolos.end();
-	vector<simbolo_t>::iterator it = std::find_if(begin_it,end_it, find_simbolo(s.lexema)); 
-	if(it == end_it)
-	{
-		ambito->simbolos.push_back(s);
-	}else{
-		//msgError(ERRSEM_LEXEMAEXISTE, nlin, ncol, lexema);
-	}
-	
-}
-int getDir(){
+void nuevoSimbolo(simbolo_t& simbolo, const int& tipo) { 
 
+  toLower(simbolo.lexema);
+
+  if(!existeSimbolo(simbolo.lexema))  // Si no existe
+  {
+    simbolo_t s;
+    tipo_t obj_tipo;
+    
+    if(buscarTipo(tipo, obj_tipo))
+    {
+      //s.size = obj_tipo.size;
+    }
+    else
+    {
+      /* CREAR NUEVO TIPO */
+    }
+    
+
+    s.lexema    = simbolo.lexema;
+    s.tipo      = tipo;
+    s.lin       = simbolo.lin;
+    s.col       = simbolo.col;
+    s.dir       = ptr_mem;
+    s.idTipo  = simbolo.idTipo;
+    s.esArray  = simbolo.esArray;
+    // asignamos la relacion del tipo con la tabla de tipos
+    if(!s.esArray){
+      switch(tipo)
+      {
+        case ENTERO: 
+          s.idTipo = 0;
+          break;
+        case REAL:
+          s.idTipo = 1;
+          break;
+        case BOOLEANO:
+          s.idTipo = 2;
+          break;
+        case SCANNER:
+          s.idTipo = 3;
+          break;
+      }     
+    }
+
+
+    ptr_mem += obj_tipo.size;
+
+    if(ptr_mem > MAX_MEM)   // Si no cabe en memoria..
+      msgError(ERR_NOCABE, simbolo.lin, simbolo.col, simbolo.lexema.c_str());    // error, memoria llena  
+
+    simbolos.push_back(s);
+  }
+  else
+    msgError(ERRYADECL, simbolo.lin, simbolo.col, simbolo.lexema.c_str());   // Error, simbolo ya declarado
+  
+}
+
+bool existeSimbolo(string& simbolo) {
+  toLower(simbolo);
+  std::vector<simbolo_t>::iterator begin_it = simbolos.begin();
+  std::vector<simbolo_t>::iterator end_it   = simbolos.end();
+  std::vector<simbolo_t>::iterator it       = std::find_if(begin_it,end_it, find_simbolo(simbolo)); 
+
+  return it != end_it;
+}
+
+bool buscarSimbolo(simbolo_t& simbolo) {    // simbolo debe llegar con el lexema y volvera con todos los atributos
+  toLower(simbolo.lexema);
+  std::vector<simbolo_t>::iterator begin_it = simbolos.begin();
+  std::vector<simbolo_t>::iterator end_it   = simbolos.end();
+  std::vector<simbolo_t>::iterator it       = std::find_if(begin_it,end_it, find_simbolo(simbolo.lexema)); 
+
+  if(it != end_it)
+  {
+    simbolo.tipo  = it->tipo;
+    simbolo.dir   = it->dir;
+
+    #if DEBUG_MODE
+      cout << "buscarSimbolo --> Dir: " << simbolo.dir << "\tTipo: "<< simbolo.tipo << "\n";
+    #endif
+
+    return true;
+  }
+  return false;
+} 
+
+int getDir() {
 	return 1;
 }
 
 int NTemp(){
-
 	nTempActual ++; 
 	if(nTempActual >= nTempMax)
 		msgError(ERR_MAXTMP, nlin, ncol, "") ;
 	else return nTempActual;
 }
 
-simbolo_t* buscar_simbolo(const char* lexema)
-{
-	simbolo_t *s = (simbolo_t*)malloc(sizeof(struct simbolo_t));
-	bool encontrado = false;
-	tabla_simbolos_t* actual = ambito;
-	vector<simbolo_t>::iterator begin_it, end_it, it;	
-	begin_it = actual->simbolos.begin();
-	end_it = actual->simbolos.end();
-	while(!encontrado)
-	{
-		it = std::find_if(begin_it, end_it, find_simbolo(std::string(lexema))); 
-		if(it != end_it)
-		{
-			encontrado = true;
-			s = &(*it);
-		}else if(actual->ts_padre != NULL)
-		{
-			actual = actual->ts_padre;
-			begin_it = actual->simbolos.begin();
-			end_it = actual->simbolos.end();
-		}else{
-			s = NULL;
-			break;
-		}
-	}
-	return s;
-} 
+bool buscarTipo(int tipo_buscado, tipo_t& t) {
+  std::vector<tipo_t>::iterator it_tipos;
 
-bool lexema_existe(const char* lexema)
-{
-	bool existe = false;
-	tabla_simbolos_t* actual = ambito;
-	vector<simbolo_t>::iterator begin_it, end_it, it;
-	begin_it = actual->simbolos.begin();
-	end_it = actual->simbolos.end();
-	while(!existe)
-	{
-		it = std::find_if(begin_it, end_it, find_simbolo(std::string(lexema))); 
-		if(it != end_it)
-		{
-			existe = true;
-		}else if(actual->ts_padre != NULL)
-		{
-			actual = actual->ts_padre;
-			begin_it = actual->simbolos.begin();
-			end_it = actual->simbolos.end();
-		}else{
-			break;
-		}
-	}
-	return existe;
+#if DEBUG_MODE == 2
+  cout << "Buscando tipo " << tipo_buscado << "...\n";
+#endif
+
+  for(it_tipos = tabla_tipos.begin(); it_tipos != tabla_tipos.end(); ++it_tipos)
+  {
+    if(it_tipos->tipo == tipo_buscado)
+    {
+      t.tipo      = it_tipos->tipo;
+      t.size      = it_tipos->size;
+      t.tipo_base = it_tipos->tipo_base;
+
+      return true;
+    }
+  }
+  return false;
 }
 
-void print_tabla_simbolos()
+void inicializarTablaTipos() {
+  tipo_t t;
+  tabla_tipos.clear();
+
+  t.tipo      = ENTERO;
+  t.size      = TAM_ENTERO;
+  t.tipo_base = -1;
+  tabla_tipos.push_back(t);
+
+  t.tipo      = REAL;
+  t.size      = TAM_REAL;
+  t.tipo_base = -1;
+  tabla_tipos.push_back(t);
+
+  t.tipo      = BOOLEANO;
+  t.size      = TAM_BOOLEANO;
+  t.tipo_base = -1;
+  tabla_tipos.push_back(t);
+
+  t.tipo      = SCANNER;
+  t.size      = TAM_SCANNER;
+  t.tipo_base = -1;
+  tabla_tipos.push_back(t);
+}
+
+void print_tabla_tipos() {
+  std::vector<tipo_t>::iterator it_tipos;
+  int pos = 0;
+  std::cout << "############ TABLA DE TIPOS ############\n";
+
+  for(it_tipos = tabla_tipos.begin(); it_tipos != tabla_tipos.end(); ++it_tipos)
+  {
+    cout << "Pos: " << pos << 
+            "\tTipo: " << it_tipos->tipo << 
+            "\tTam: " << it_tipos->size <<
+            "\tT.Base: " << it_tipos->tipo_base << "\n";
+    ++pos;
+  }
+  std::cout << "########################################\n";
+
+}
+
+void print_tabla_simbolos() {
+  std::cout << "############ TABLA DE SIMBOLOS ############\n";
+  std::vector<simbolo_t>::iterator it_simbolos;
+  int pos = 0;
+  for(it_simbolos = simbolos.begin(); it_simbolos != simbolos.end(); ++it_simbolos)
+  {
+    cout << "Pos.: " << pos << 
+    "\tSimbolo: " << it_simbolos->lexema << 
+    "\tTipo: " << it_simbolos->tipo << 
+    "\tIdx.Tipo: " << it_simbolos->idTipo << 
+    "\tDir.: " << it_simbolos->dir <<
+    "\tArray? " << it_simbolos->esArray << "\n";
+    ++pos;
+  }
+  std::cout << "###########################################\n";
+}
+
+void nuevoTipo(const int& tipo_base, const int& inicio, const int& fin) {
+  tipo_t t;
+  switch(tipo_base)
+  {
+    case ENTERO: 
+      t.tipo_base = 0;
+      break;
+    case REAL:
+      t.tipo_base = 1;
+      break;
+    case BOOLEANO:
+      t.tipo_base = 2;
+      break;
+    case SCANNER:
+      t.tipo_base = 3;
+      break;
+    default:
+      t.tipo_base = tipo_base;
+      break;
+  }
+  t.tipo    = ARRAY;
+  t.size    = fin-inicio+1;
+  tabla_tipos.push_back(t);
+}
+
+void toLower(string& str)
 {
-	struct tabla_simbolos_t *actual = ambito;
-	std::cout << "############ TABLA DE SIMBOLOS ############\n";
-	while(actual != NULL)
-	{		
-		std::cout << actual->nombre << ": ";
-		for(unsigned int i=0;i<actual->simbolos.size();i++)
-		{
-			if(actual->simbolos[i].tipo == ENTERO){
-				std::cout << "Integer ";
-			}else if(actual->simbolos[i].tipo == REAL){
-				std::cout << "Double ";
-			}
-			std::cout << actual->simbolos[i].lexema << "(" << actual->simbolos[i].trad << ")";
-			std::cout << ", ";
-		}
-		std::cout << "\n";
-		if(actual->ts_padre != NULL)
-		{
-			actual = actual->ts_padre;
-		}else{
-			break;
-		}
-	}
-	std::cout << "###########################################\n";
+  for(int i = 0; i < str.size(); i++)
+  {
+    str[i] = tolower(str[i]);
+  }
 }
 
 void destruir_ambito_actual()

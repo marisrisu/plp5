@@ -1,22 +1,19 @@
 /*----------------------- comun.h -----------------------------*/
 //Maria Luisa Risueño Gonzalez;48673390p
-//Marcos Gonzalez Verdu;
+//Marcos Gonzalez Verdu;48772028e
 /* fichero con definciones comunes para los ficheros .l y .y */
 
 typedef struct {
-   char *lexema;
-   int nlin,ncol;
-   int tipo;
-   string cod;
-   string prefijo;
-   string th;
-   string dir;
-   string dbase;
-   int tam;
-
+	char 		*lexema;
+	int 		nlin,ncol;
+	int 		tipo;
+	int 		tipoBase;
+	int 		dir;
+	int 		dBase;
+	bool 		esArray;
+	std::string cod;
+	std::string prefijo;
 } MITIPO;
-
-
 
 #define YYSTYPE MITIPO
 
@@ -50,10 +47,20 @@ typedef struct {
 
 #define ENTERO		1
 #define REAL		2
-#define BOOL_		3
+#define BOOLEANO	3
 #define ARRAY		4
 #define SCANNER		5
 #define FUNCION		6
 #define VARIABLE	7
+
+#define TAM_ENTERO		1
+#define TAM_BOOLEANO	1
+#define TAM_SCANNER		1
+#define TAM_REAL		1
+
+// Ultima posicion de memoria disponible
+#define MAX_POS_MEM			16383
+// Maxima posicion memoria variables
+#define MAX_MEM 			15999
 
 void msgError(int nerror,int nlin,int ncol,const char *s);
