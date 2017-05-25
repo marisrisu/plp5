@@ -111,7 +111,6 @@ typedef struct tabla_simbolos_t
 	std::vector<simbolo_t> simbolos;			
 }tabla_simbolos;
 
-simbolo_t* buscar_simbolo(const char* lexema); 
 bool lexema_existe(const char* lexema);
 void print_tabla_simbolos();
 void crear_ambito(const char* nombre);
@@ -134,7 +133,7 @@ std::vector<simbolo_t> simbolos;
 // tabla de tipos
 vector<tipo> tabla_tipos;
 // añadir simbolo a la tabla actual
-void nuevoSimbolo(const char* lexema,const int& tipo, const int& dir, const bool& esArray, int idTipo,int nlin,int ncol);
+//void nuevoSimbolo(const char* lexema,int tipo,int dir,bool esArray, int idTipo,int nlin,int ncol);
 //void nuevoSimbolo(simbolo_t& s, const int& tipo);
 // recuperar simbolo por lexema (simbolo debe contener lexema al llamar a la funcion)
 bool buscarSimbolo(simbolo_t& simbolo); 
@@ -143,26 +142,33 @@ bool existeSimbolo(string &simbolo);
 
 int NTemp();
 // Devuelve el struct de un tipo
-bool buscarTipo(int tipo_buscado, tipo_t& t);
+//bool buscarTipo(int tipo_buscado, tipo_t& t);
+
+bool buscarTipo(const char* lexema){
+	return true;
+}
 // Inicializa tabla tipos con los basicos
 void inicializarTablaTipos();
 // añade un tipo array la tabla de tipos
-void nuevoTipo(const int& tam, const int& tipo);
+void nuevoTipo(int tam,int tipo);
 // Pasa un string a minusculas
 void toLower(string& str);
 
 bool esBase(int tipo);
+
+int buscarDir(const char* lexema);
+int tipoBase(int tipo);
 
 %}
 
 %%
 //AQUI LAS REGLAS
 S : Import Class {
-	$$.cod = $1.cod + $2.cod;
-	print_tabla_simbolos();
-						int tk = yylex();
-                        if (tk != 0) yyerror("");
-                        cout << $2.cod << endl;
+	$$.cod = $2.cod;
+
+			int tk = yylex();
+            if (tk != 0) yyerror("");
+            cout << $2.cod << endl;
 };
 
 Import : Import import_ SecImp pyc_ {
@@ -174,11 +180,10 @@ Import : Import import_ SecImp pyc_ {
 	   };
 
 SecImp : SecImp punto_ id {
-	$$.cod = $1.cod;
 		//No hace nada?
 }
 	    | SecImp punto_ scanner_ {
-	    	$$.cod = $1.cod;
+	    	//$$.cod = $1.cod;
 	//No hace nada?
 	   }
 	    | id {
@@ -227,7 +232,7 @@ Bloque : llavei_ BDecl SeqInstr llaved_ {
 };
 
 BDecl : BDecl DVar {
-	$$.cod = $1.cod;
+	$$.cod = $2.cod;
 }
 	   | {
 	  
@@ -240,14 +245,14 @@ DVar : Tipo {$$.tipo = $1.tipo; } LIdent pyc_ {
     $$.tipo = $1.tipo;
     
     }
-    | Tipo DimSN id asig_ new_ Tipo {$$.tipo = $1.tipo} Dimensiones pyc_ {
+    | Tipo DimSN id asig_ new_ Tipo {$$.tipo = $1.tipo;} Dimensiones pyc_ {
 
       if(esBase($8.tipo))
       {
         int tmp = NTemp();
         $$.dir = tmp;
         $$.tipo = $1.tipo;
-        nuevoSimbolo($3.lexema,$1.tipo, tmp, true, $8.tipo, nlin, ncol-strlen(yytext));
+        //nuevoSimbolo($3.lexema,$1.tipo, tmp, true, $8.tipo, nlin, ncol-strlen(yytext));
 
     }else
     {
@@ -272,19 +277,20 @@ Dimensiones : cori_ nentero cord_ Dimensiones {
     $$.dir = tmp;
     $$.tipo = $0.tipo;
     //No hace falta cod porque es una declaración, las operacioens de cod se harán cuando se acceda a lectura de los arrays. NOP?
-    nuevoTipo($2.lexema, $0.tipo);
+    //nuevoTipo($2.lexema, $0.tipo);
 }
        | cori_ nentero cord_ {
         int tmp = NTemp();
         $$.dir = tmp;
         $$.tipo = $0.tipo;
-        nuevoTipo($2.lexema, $0.tipo);
+  //      nuevoTipo($2.lexema, $0.tipo);
       };
 LIdent : {$$.tipo = $0.tipo;} LIdent coma_  {$$.tipo = $0.tipo;} Variable {
 
 	int tmp = NTemp();
 	$$.dir = tmp;
-	
+	$$.tipo = $0.tipo ;
+	$$.cod = $2.cod + $5.cod;
 	}
 	   | Variable {
 	   	$$ = $1;
@@ -295,7 +301,11 @@ Variable : {$$.tipo = $0.tipo;} id {
 
 	int tmp = NTemp();
 	$$.dir = tmp;
-	nuevoSimbolo($2.lexema,VARIABLE, tmp, false, $0.tipo );
+	$$.cod = "mov #";
+	$$.cod += tmp;
+	$$.cod += "A";
+	$$.tipo = $0.tipo;
+	//nuevoSimbolo($2.lexema,VARIABLE, tmp, false, $0.tipo,nlin,ncol );
 
 };
 
@@ -412,7 +422,8 @@ Factor : Ref {
 
 Ref : id {
   
-  //$$.tipo = buscarTipo($1.lexema);
+  simbolo_t s;
+  $$.tipo = buscarTipo($1.lexema);
   int tmp = NTemp();
   $$.dir = tmp;
   $$.dBase = buscarDir($1.lexema);
@@ -427,7 +438,7 @@ Ref : id {
         int tmp = NTemp();
         $$.dir = tmp;
         $$.dBase = $1.dBase;
-        $$.cod = $1.cod + $4.cod + "mov #" + tamTipo($1.tipo) + "\naddi " + $4.dir + "\nmov A " + tmp;
+        //$$.cod = $1.cod + $4.cod + "mov #" + tamTipo($1.tipo) + "\naddi " + $4.dir + "\nmov A " + tmp;
       }
 
   };
@@ -523,9 +534,23 @@ void crear_ambito(const char* nombre)
 	ambito = nuevo_ambito; 
 }
 
+/*void nuevoSimbolo(const char* lexema,const int& tipo, const int& dir, const bool& esArray, int idTipo,int nlin,int ncol){
 
+}
+*/
+int tipoBase(int tipo){
+	return 1;
+}
 
-void nuevoSimbolo(simbolo_t& simbolo, const int& tipo) { 
+int buscarDir(const char* lexema){
+
+	simbolo_t s;
+	s.lexema = lexema;
+	if(buscarSimbolo(s))
+		return s.dir;
+
+}
+/*void nuevoSimbolo(simbolo_t& simbolo, const int& tipo) { 
 
   toLower(simbolo.lexema);
 
@@ -540,7 +565,7 @@ void nuevoSimbolo(simbolo_t& simbolo, const int& tipo) {
     }
     else
     {
-      /* CREAR NUEVO TIPO */
+      
     }
     
 
@@ -580,8 +605,7 @@ void nuevoSimbolo(simbolo_t& simbolo, const int& tipo) {
   }
   else
     msgError(ERRYADECL, simbolo.lin, simbolo.col, simbolo.lexema.c_str());   // Error, simbolo ya declarado
-  
-}
+}*/
 
 bool existeSimbolo(string& simbolo) {
   toLower(simbolo);
@@ -623,7 +647,7 @@ int NTemp(){
 	else return nTempActual;
 }
 
-bool buscarTipo(int tipo_buscado, tipo_t& t) {
+/*bool buscarTipo(int tipo_buscado, tipo_t& t) {
   std::vector<tipo_t>::iterator it_tipos;
 
 #if DEBUG_MODE == 2
@@ -642,7 +666,8 @@ bool buscarTipo(int tipo_buscado, tipo_t& t) {
     }
   }
   return false;
-}
+}*/
+
 
 void inicializarTablaTipos() {
   tipo_t t;
@@ -703,7 +728,7 @@ void print_tabla_simbolos() {
   std::cout << "###########################################\n";
 }
 
-void nuevoTipo(const int& tam, const int& tipo_base) {
+void nuevoTipo(int tam,int tipo_base) {
   tipo_t t;
   switch(tipo_base)
   {
