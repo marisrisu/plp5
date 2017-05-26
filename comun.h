@@ -48,15 +48,11 @@ typedef struct {
 #define ENTERO		1
 #define REAL		2
 #define BOOLEANO	3
-#define ARRAY		4
-#define SCANNER		5
-#define FUNCION		6
-#define VARIABLE	7
+#define SCANNER		4
 
-#define TAM_ENTERO		1
-#define TAM_BOOLEANO	1
-#define TAM_SCANNER		1
-#define TAM_REAL		1
+
+#define TAM_BASE		1
+
 
 // Ultima posicion de memoria disponible
 #define MAX_POS_MEM			16383

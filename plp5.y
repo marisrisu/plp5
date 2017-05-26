@@ -69,7 +69,7 @@ extern int yylex();
 extern char *yytext;
 extern FILE *yyin;
 
-
+int contIdType = 4;
 int yyerror(char *s);
 
 
@@ -80,11 +80,11 @@ int ptr_label = 0;
 string operador, s1, s2;  // string auxiliares
 
 typedef struct simbolo_t {
-	string 	lexema;
-	int 	dir;
-	bool 	esArray;
-	int 	idTipo;
-	int 	lin,col;
+  string  lexema;
+  int   dir;
+  bool  esArray;
+  int   idTipo;
+  int   lin,col;
 }simbolo;
 
 typedef struct tipo_t {
@@ -97,17 +97,17 @@ typedef struct tipo_t {
 
 struct find_simbolo : std::unary_function<simbolo_t, bool>
 {
-	std::string lexema;
-	find_simbolo(std::string l):lexema(l){}
-	bool operator()(simbolo_t const& s) const
-	{ return s.lexema == lexema; }
+  std::string lexema;
+  find_simbolo(std::string l):lexema(l){}
+  bool operator()(simbolo_t const& s) const
+  { return s.lexema == lexema; }
 };
 
 typedef struct tabla_simbolos_t 
 {
-	const char* nombre;
-	struct tabla_simbolos_t* ts_padre;
-	std::vector<simbolo_t> simbolos;			
+  const char* nombre;
+  struct tabla_simbolos_t* ts_padre;
+  std::vector<simbolo_t> simbolos;      
 }tabla_simbolos;
 
 bool lexema_existe(const char* lexema);
@@ -132,7 +132,7 @@ std::vector<simbolo_t> simbolos;
 // tabla de tipos
 vector<tipo> tabla_tipos;
 // añadir simbolo a la tabla actual
-void nuevoSimbolo(char* lexema,int dir,bool esArray, int idTipo,int nlin,int ncol);
+void nuevoSimbolo(char* lexema,bool esArray, int idTipo,int nlin,int ncol);
 //void nuevoSimbolo(simbolo_t& s, const int& tipo);
 // recuperar simbolo por lexema (simbolo debe contener lexema al llamar a la funcion)
 bool buscarSimbolo(simbolo_t& simbolo); 
@@ -150,12 +150,12 @@ int tipoBase(int tipo);
 // Inicializa tabla tipos con los basicos
 void inicializarTablaTipos();
 // añade un tipo array la tabla de tipos
-void nuevoTipo(int tam,int tipo);
+int nuevoTipo(int tam,int tipo);
 
 bool esBase(int tipo);
 
 int buscarDir(const char* lexema);
-
+void print_tabla_tipos();
 %}
 
 %%
@@ -189,12 +189,12 @@ SecImp : SecImp punto_ id {
 
 Class : public_ class_ id llavei_ Main llaved_ {
 		//No hace nada?
-	$$.cod = $5.cod;
+	
 };
 
 Main : public_ static_ void_ main_ pari_ string_ cori_ cord_ id pard_ Bloque  {
 		//No hace nada?
-	$$.cod = $11.cod;
+	
 };
 
 Tipo : int_ {
@@ -225,11 +225,11 @@ Tipo : int_ {
 
 Bloque : llavei_ BDecl SeqInstr llaved_ {
 	
-	$$.cod = $1.cod;
+	
 };
 
 BDecl : BDecl DVar {
-	$$.cod = $2.cod;
+	
 }
 	   | {
 	  
@@ -237,24 +237,18 @@ BDecl : BDecl DVar {
 
 DVar : Tipo {$$.tipo = $1.tipo; } LIdent pyc_ {
 
-    int tmp = NTemp();
-    $$.dir = tmp;
-    $$.tipo = $1.tipo;
-    
+	    ptr_label = NTemp();
+	    $$.dir = ptr_label;
+	    $$.tipo = $1.tipo;
     }
-    | Tipo DimSN id asig_ new_ Tipo {$$.tipo = $1.tipo;} Dimensiones pyc_ {
+    | Tipo DimSN id asig_ new_ Tipo {if($1.tipo != $6.tipo) msgError(ERR_TIPOSDECLARRAY, nlin,ncol,$1.lexema); $$.tipo = $1.tipo;} Dimensiones pyc_ {
 
-      if(esBase($8.tipo))
-      {
-        int tmp = NTemp();
-        $$.dir = tmp;
-        $$.tipo = $1.tipo;
-        //nuevoSimbolo($3.lexema,$1.tipo, tmp, true, $8.tipo, nlin, ncol-strlen(yytext));
-
-    }else
-    {
-      msgError(ERRDIM, nlin, ncol, "");
-      }
+	        ptr_label = NTemp();
+	        $$.dir = ptr_label;
+	        $$.tipo = $1.tipo;
+	        nuevoSimbolo($3.lexema, true, $8.tipo, nlin, ncol-strlen(yytext));
+          print_tabla_simbolos();
+          print_tabla_tipos();
 
    }
     | scanner_ id asig_ new_ scanner_ pari_ system_ punto_ in_ pard_ pyc_ {
@@ -268,42 +262,45 @@ DimSN : DimSN cori_ cord_ {
 
     };
 
-Dimensiones : cori_ nentero cord_ Dimensiones {
+Dimensiones : cori_ nentero cord_ {$$.tipo = $0.tipo} Dimensiones {
     
-    int tmp = NTemp();
-    $$.dir = tmp;
-    $$.tipo = $0.tipo;
-    //No hace falta cod porque es una declaración, las operacioens de cod se harán cuando se acceda a lectura de los arrays. NOP?
-    //nuevoTipo($2.lexema, $0.tipo);
+    ptr_label = NTemp();
+    $$.dir = ptr_label;
+    $$.tipo = nuevoTipo(std::atoi($2.lexema), $5.tipo);
 }
        | cori_ nentero cord_ {
-        int tmp = NTemp();
-        $$.dir = tmp;
-        $$.tipo = $0.tipo;
-  //      nuevoTipo($2.lexema, $0.tipo);
-      };
-LIdent : {$$.tipo = $0.tipo;} LIdent coma_  {$$.tipo = $0.tipo;} Variable {
+        ptr_label = NTemp();
+        $$.dir = ptr_label;
+        $$.tipo = nuevoTipo(std::atoi($2.lexema), $0.tipo);
 
-	int tmp = NTemp();
-	$$.dir = tmp;
-	$$.tipo = $0.tipo ;
-	$$.cod = $2.cod + $5.cod;
+      };
+
+
+LIdent : {$$.tipo = $0.tipo;} LIdent coma_ {$$.tipo = $0.tipo;} Variable {
+
+		ptr_label = NTemp();
+		$$.dir = ptr_label;
+		$$.tipo = $0.tipo ;
 	}
-	   | Variable {
-	   	$$ = $1;
+	   | {$$.tipo = $0.tipo;} Variable {
+	      ptr_label = NTemp();
+        $$.dir = ptr_label;
+        $$.tipo = $0.tipo;
+        print_tabla_simbolos();
 
 	   };
 
 Variable : {$$.tipo = $0.tipo;} id {
 
-	int tmp = NTemp();
-	$$.dir = tmp;
-	$$.cod = "mov #";
-	$$.cod += tmp;
-	$$.cod += "A";
+	ptr_label = NTemp();
+	$$.dir = ptr_label;
 	$$.tipo = $0.tipo;
-	nuevoSimbolo($2.lexema, tmp, false, $0.tipo,nlin,ncol);
+  print_tabla_simbolos();
+	nuevoSimbolo($2.lexema,false, $0.tipo,nlin,ncol );
+  
 };
+
+
 
 SeqInstr : SeqInstr Instr {
 	$$.cod = $1.cod + $2.cod;
@@ -438,6 +435,7 @@ Ref : id {
       }
 
   };
+  
 	
 %%
 bool esBase(int tipo)
@@ -541,9 +539,7 @@ int buscarDir(const char* lexema){
 		return s.dir;
 
 }
-
-//void nuevoSimbolo(simbolo_t& simbolo, const int& tipo) { 
-void nuevoSimbolo(char* lexema, int dir, bool esArray, int idTipo, int lin, int col) {
+void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
   if(!existeSimbolo(lexema))  // Si no existe
   {
     simbolo_t s;
@@ -554,25 +550,25 @@ void nuevoSimbolo(char* lexema, int dir, bool esArray, int idTipo, int lin, int 
     s.lin       = lin;
     s.col       = col;
     s.dir       = ptr_mem;
-    s.idTipo  	= idTipo;
-    s.esArray  	= esArray;
+    s.idTipo    = idTipo;
+    s.esArray   = esArray;
     
-	    if(!s.esArray) {
-	      switch(idTipo) {
-	        case ENTERO: 
-	          s.idTipo = 0;
-	          break;
-	        case REAL:
-	          s.idTipo = 1;
-	          break;
-	        case BOOLEANO:
-	          s.idTipo = 2;
-	          break;
-	        case SCANNER:
-	          s.idTipo = 3;
-	          break;
-	      }     
-	    }
+      if(!s.esArray) {
+        switch(idTipo) {
+          case ENTERO: 
+            s.idTipo = 0;
+            break;
+          case REAL:
+            s.idTipo = 1;
+            break;
+          case BOOLEANO:
+            s.idTipo = 2;
+            break;
+          case SCANNER:
+            s.idTipo = 3;
+            break;
+        }     
+      }
 
 
     ptr_mem += obj_tipo.size;
@@ -593,8 +589,8 @@ bool existeSimbolo(const char* simbolo) {
 
   return it != end_it;
 }
-
 bool buscarSimbolo(simbolo_t& simbolo) {    // simbolo debe llegar con el lexema y volvera con todos los atributos
+  
   std::vector<simbolo_t>::iterator begin_it = simbolos.begin();
   std::vector<simbolo_t>::iterator end_it   = simbolos.end();
   std::vector<simbolo_t>::iterator it       = std::find_if(begin_it,end_it, find_simbolo(simbolo.lexema)); 
@@ -618,33 +614,40 @@ int getDir() {
 }
 
 int NTemp(){
-	nTempActual ++; 
-	if(nTempActual >= nTempMax)
+
+
+    cout << "Holaaaa";
+	ptr_mem_temp ++;
+
+	if(ptr_mem_temp >= MAX_POS_MEM)
 		msgError(ERR_MAXTMP, nlin, ncol, "") ;
-	else return nTempActual;
+
+	else return ptr_mem_temp;
 }
 
+
 int buscarTipoSimbolo(const char * lexema) {
-	simbolo_t simbolo;
-	simbolo.lexema = lexema;
-	buscarSimbolo(simbolo);
-	return simbolo.idTipo;
+  simbolo_t simbolo;
+  simbolo.lexema = lexema;
+  buscarSimbolo(simbolo);
+  return simbolo.idTipo;
 }
 
 bool buscarTipo(int tipo_buscado, tipo_t& t) {
-	std::vector<tipo_t>::iterator it_tipos;
+  std::vector<tipo_t>::iterator it_tipos;
 
-	for(it_tipos = tabla_tipos.begin(); it_tipos != tabla_tipos.end(); ++it_tipos) {
-		if(it_tipos->tipo == tipo_buscado) {
-		  t.tipo      = it_tipos->tipo;
-		  t.size      = it_tipos->size;
-		  t.tipo_base = it_tipos->tipo_base;
+  for(it_tipos = tabla_tipos.begin(); it_tipos != tabla_tipos.end(); ++it_tipos) {
+    if(it_tipos->tipo == tipo_buscado) {
+      t.tipo      = it_tipos->tipo;
+      t.size      = it_tipos->size;
+      t.tipo_base = it_tipos->tipo_base;
 
-		  return true;
-		}
-	}
-	return false;
+      return true;
+    }
+  }
+  return false;
 }
+
 
 
 void inicializarTablaTipos() {
@@ -652,22 +655,22 @@ void inicializarTablaTipos() {
   tabla_tipos.clear();
 
   t.tipo      = ENTERO;
-  t.size      = TAM_ENTERO;
+  t.size      = TAM_BASE;
   t.tipo_base = -1;
   tabla_tipos.push_back(t);
 
   t.tipo      = REAL;
-  t.size      = TAM_REAL;
+  t.size      = TAM_BASE;
   t.tipo_base = -1;
   tabla_tipos.push_back(t);
 
   t.tipo      = BOOLEANO;
-  t.size      = TAM_BOOLEANO;
+  t.size      = TAM_BASE;
   t.tipo_base = -1;
   tabla_tipos.push_back(t);
 
   t.tipo      = SCANNER;
-  t.size      = TAM_SCANNER;
+  t.size      = TAM_BASE;
   t.tipo_base = -1;
   tabla_tipos.push_back(t);
 }
@@ -689,7 +692,7 @@ void print_tabla_tipos() {
 
 }
 
-/* void print_tabla_simbolos() {
+void print_tabla_simbolos() {
   std::cout << "############ TABLA DE SIMBOLOS ############\n";
   std::vector<simbolo_t>::iterator it_simbolos;
   int pos = 0;
@@ -697,18 +700,18 @@ void print_tabla_tipos() {
   {
     cout << "Pos.: " << pos << 
     "\tSimbolo: " << it_simbolos->lexema << 
-    "\tTipo: " << it_simbolos->tipo << 
     "\tIdx.Tipo: " << it_simbolos->idTipo << 
     "\tDir.: " << it_simbolos->dir <<
     "\tArray? " << it_simbolos->esArray << "\n";
     ++pos;
   }
   std::cout << "###########################################\n";
-} */
+}
 
-void nuevoTipo(int tam,int tipo_base) {
+int nuevoTipo(int tam,int tipo_base) {
+  
   tipo_t t;
-  switch(tipo_base)
+ /*switch(tipo_base)
   {
     case ENTERO: 
       t.tipo_base = 0;
@@ -725,10 +728,21 @@ void nuevoTipo(int tam,int tipo_base) {
     default:
       t.tipo_base = tipo_base;
       break;
-  }
-  t.tipo    = ARRAY;
+  }*/
+  t.tipo_base = tipo_base;
+  t.tipo    = ++contIdType;
   t.size    = tam;
   tabla_tipos.push_back(t);
+
+  return t.tipo;
+}
+
+void toLower(string& str)
+{
+  for(int i = 0; i < str.size(); i++)
+  {
+    str[i] = tolower(str[i]);
+  }
 }
 
 void destruir_ambito_actual()
@@ -763,6 +777,7 @@ int main(int argc,char *argv[])
         if (fent)
         {
         	crear_ambito("global");
+          inicializarTablaTipos();
             yyin = fent;
             yyparse();
             fclose(fent);
