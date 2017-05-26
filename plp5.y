@@ -161,6 +161,7 @@ void print_tabla_tipos();
 %%
 //AQUI LAS REGLAS
 S : Import Class {
+	if(DEBUG) std::cout << " - Leído S...\n";
 	$$.cod = $2.cod;
 
 			int tk = yylex();
@@ -169,35 +170,43 @@ S : Import Class {
 };
 
 Import : Import import_ SecImp pyc_ {
+	if(DEBUG) std::cout << " - Leído Import 1...\n";
 	$$.cod = $1.cod + $3.cod;
 	//No hace nada?
 }
 	    | {
 	//No hace nada?
+	    	if(DEBUG) std::cout << " - Leído Import 2...\n";
 	   };
 
 SecImp : SecImp punto_ id {
 		//No hace nada?
-}
+		if(DEBUG) std::cout << " - Leído SecImp 1...\n";
+	}
 	    | SecImp punto_ scanner_ {
+		if(DEBUG) std::cout << " - Leído SecImp 2...\n";
 	    	//$$.cod = $1.cod;
 	//No hace nada?
 	   }
 	    | id {
+		if(DEBUG) std::cout << " - Leído SecImp 3...\n";
 	//No hace nada?
 	   };
 
 Class : public_ class_ id llavei_ Main llaved_ {
 		//No hace nada?
+		if(DEBUG) std::cout << " - Leído Class...\n";
 	
 };
 
 Main : public_ static_ void_ main_ pari_ string_ cori_ cord_ id pard_ Bloque  {
 		//No hace nada?
+		if(DEBUG) std::cout << " - Leído Main...\n";
 	
 };
 
 Tipo : int_ {
+		if(DEBUG) std::cout << " - Leído Tipo 1...\n";
 		int tmp = NTemp();
 		$$.dir = tmp;
 		$$.nlin = nlin;
@@ -206,7 +215,7 @@ Tipo : int_ {
 
 	}
 	  | double_ {
-		
+		if(DEBUG) std::cout << " - Leído Tipo 2...\n";
 		int tmp = NTemp();
 		$$.dir = tmp;
 		$$.tipo = REAL;
@@ -214,7 +223,7 @@ Tipo : int_ {
 		$$.ncol = ncol;
 	 }
 	  | boolean_ {
-
+		if(DEBUG) std::cout << " - Leído Tipo 3...\n";
 	  	int tmp = NTemp();
 		$$.dir = tmp;
 		$$.tipo = BOOLEANO;
@@ -224,51 +233,53 @@ Tipo : int_ {
 	 };
 
 Bloque : llavei_ BDecl SeqInstr llaved_ {
-	
+		if(DEBUG) std::cout << " - Leído Bloque...\n";
 	
 };
 
 BDecl : BDecl DVar {
-	
+		if(DEBUG) std::cout << " - Leído BDecl 1...\n";
 }
 	   | {
+		if(DEBUG) std::cout << " - Leído BDecl 2...\n";
 	  
 	  };
 
 DVar : Tipo {$$.tipo = $1.tipo; } LIdent pyc_ {
-
+		if(DEBUG) std::cout << " - Leído DVar 1...\n";
 	    ptr_label = NTemp();
 	    $$.dir = ptr_label;
 	    $$.tipo = $1.tipo;
     }
     | Tipo DimSN id asig_ new_ Tipo {if($1.tipo != $6.tipo) msgError(ERR_TIPOSDECLARRAY, nlin,ncol,$1.lexema); $$.tipo = $1.tipo;} Dimensiones pyc_ {
-
-	        ptr_label = NTemp();
-	        $$.dir = ptr_label;
-	        $$.tipo = $1.tipo;
-	        nuevoSimbolo($3.lexema, true, $8.tipo, nlin, ncol-strlen(yytext));
-          print_tabla_simbolos();
-          print_tabla_tipos();
+		if(DEBUG) std::cout << " - Leído DVar 2...\n";
+		ptr_label = NTemp();
+		$$.dir = ptr_label;
+		$$.tipo = $1.tipo;
+		nuevoSimbolo($3.lexema, true, $8.tipo, nlin, ncol-strlen(yytext));
+		print_tabla_simbolos();
+		print_tabla_tipos();
 
    }
     | scanner_ id asig_ new_ scanner_ pari_ system_ punto_ in_ pard_ pyc_ {
-
+		if(DEBUG) std::cout << " - Leído DVar 3...\n";
    };
 
 DimSN : DimSN cori_ cord_ {
-  
+		if(DEBUG) std::cout << " - Leído DimSN 1...\n";
 }
      | cori_ cord_ {
-
+		if(DEBUG) std::cout << " - Leído DimSN 2...\n";
     };
 
-Dimensiones : cori_ nentero cord_ {$$.tipo = $0.tipo} Dimensiones {
-    
-    ptr_label = NTemp();
-    $$.dir = ptr_label;
-    $$.tipo = nuevoTipo(std::atoi($2.lexema), $5.tipo);
-}
+Dimensiones : cori_ nentero cord_ {$$.tipo = $0.tipo; } Dimensiones {
+		if(DEBUG) std::cout << " - Leído Dimensiones 1...\n";
+		ptr_label = NTemp();
+		$$.dir = ptr_label;
+		$$.tipo = nuevoTipo(std::atoi($2.lexema), $5.tipo);
+	}
        | cori_ nentero cord_ {
+		if(DEBUG) std::cout << " - Leído Dimensiones 2...\n";
         ptr_label = NTemp();
         $$.dir = ptr_label;
         $$.tipo = nuevoTipo(std::atoi($2.lexema), $0.tipo);
@@ -276,165 +287,194 @@ Dimensiones : cori_ nentero cord_ {$$.tipo = $0.tipo} Dimensiones {
       };
 
 
-LIdent : {$$.tipo = $0.tipo;} LIdent coma_ {$$.tipo = $0.tipo;} Variable {
-
+LIdent : { $$.tipo = $0.tipo;} LIdent coma_ Variable {
+		if(DEBUG) std::cout << " - Leído LIdent 1...\n";
 		ptr_label = NTemp();
 		$$.dir = ptr_label;
-		$$.tipo = $0.tipo ;
 	}
-	   | {$$.tipo = $0.tipo;} Variable {
-	      ptr_label = NTemp();
-        $$.dir = ptr_label;
-        $$.tipo = $0.tipo;
-        print_tabla_simbolos();
+	| { $$.tipo = $0.tipo; } Variable {
+		if(DEBUG) std::cout << " - Leído LIdent 2...\n";
+		ptr_label = NTemp();
+		$$.dir = ptr_label;
+		print_tabla_simbolos();
+	};
 
-	   };
-
-Variable : {$$.tipo = $0.tipo;} id {
+Variable : id {
+	if(DEBUG) std::cout << " - Leído Variable...\n";
 
 	ptr_label = NTemp();
 	$$.dir = ptr_label;
 	$$.tipo = $0.tipo;
-  print_tabla_simbolos();
-	nuevoSimbolo($2.lexema,false, $0.tipo,nlin,ncol );
-  
+	print_tabla_simbolos();
+	nuevoSimbolo($1.lexema,false, $0.tipo,nlin,ncol );
 };
 
 
 
 SeqInstr : SeqInstr Instr {
-	$$.cod = $1.cod + $2.cod;
-}
-		  | {
-		 };
+		if(DEBUG) std::cout << " - Leído SeqInstr 1...\n";
+		$$.cod = $1.cod + $2.cod;
+	}
+	| {
+		if(DEBUG) std::cout << " - Leído SeqInstr 2...\n";
+	};
 
 Instr : pyc_ {
-	
-}
-	  | Bloque {
+		if(DEBUG) std::cout << " - Leído Instr 1...\n";	
 
-	  }
-	  | Ref asig_ Expr pyc_ {
+	}
+	| Bloque {
+		if(DEBUG) std::cout << " - Leído Instr 2...\n";	
 
-	  }
-	  | system_ punto_ out_ punto_ println_ pari_ Expr pard_ pyc_ {
+	}
+	| Ref asig_ Expr pyc_ {
+		if(DEBUG) std::cout << " - Leído Instr 3...\n";	
 
-	  }
-	  | system_ punto_ out_ punto_ print_ pari_ Expr pard_ pyc_ {
+	}
+	| system_ punto_ out_ punto_ println_ pari_ Expr pard_ pyc_ {
+		if(DEBUG) std::cout << " - Leído Instr 4...\n";	
 
-	  }
-	  | if_ pari_ Expr pard_ Instr {
+	}
+	| system_ punto_ out_ punto_ print_ pari_ Expr pard_ pyc_ {
+		if(DEBUG) std::cout << " - Leído Instr 5...\n";	
 
-	  	$$.cod = $3.cod + "\nmov " + IntToString($3.dir) + "A\njz " + IntToString($5.dir) + "\n" + $5.cod;
-	  }
-	  | if_ pari_ Expr pard_ Instr else_ Instr {
-
-	  	$$.cod = $3.cod + "\nmov " + IntToString($3.dir) + "A\njz " + IntToString($5.dir) + "\n" + $5.cod + "\njmp " + IntToString($7.dir) + $7.cod;
-	  }
-	  | while_ pari_ Expr pard_ Instr {
-	  	$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod + "\njmp " + IntToString($3.dir);
-	  };
+	}
+	| if_ pari_ Expr pard_ Instr {
+		if(DEBUG) std::cout << " - Leído Instr 6...\n";	
+		$$.cod = $3.cod + "\nmov " + IntToString($3.dir) + "A\njz " + IntToString($5.dir) + "\n" + $5.cod;
+	}
+	| if_ pari_ Expr pard_ Instr else_ Instr {
+		if(DEBUG) std::cout << " - Leído Instr 7...\n";	
+		$$.cod = $3.cod + "\nmov " + IntToString($3.dir) + "A\njz " + IntToString($5.dir) + "\n" + $5.cod + "\njmp " + IntToString($7.dir) + $7.cod;
+	}
+	| while_ pari_ Expr pard_ Instr {
+		if(DEBUG) std::cout << " - Leído Instr 8...\n";	
+		$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod + "\njmp " + IntToString($3.dir);
+	};
 
 Expr : Expr or_ EConj {
+		if(DEBUG) std::cout << " - Leído Expr 1...\n";	
 
-}
-	 | EConj {
+	}
+	| EConj {
+		if(DEBUG) std::cout << " - Leído Expr 2...\n";
 
-	 };
+	};
 
 EConj : EConj and_ ERel {
+		if(DEBUG) std::cout << " - Leído EConj 1...\n";
 	
 }
 	  | ERel {
+		if(DEBUG) std::cout << " - Leído EConj 2...\n";
 
 	  };
 
 ERel : Esimple relop_ Esimple {
+		if(DEBUG) std::cout << " - Leído ERel 1...\n";
 	
 }
 	 | Esimple {
+		if(DEBUG) std::cout << " - Leído ERel 2...\n";
 
 	 };
 
 Esimple : Esimple addop_ Term {
-	
-}
-		| Term {
+		if(DEBUG) std::cout << " - Leído Esimple 1...\n";
 
-		};
+	}
+	| Term {
+		if(DEBUG) std::cout << " - Leído Esimple 2...\n";
+
+	};
 
 Term : Term mulop_ Factor {
-	
-}
-	 | Factor {
+		if(DEBUG) std::cout << " - Leído Term 1...\n";
+		
+	}
+	| Factor {
+		if(DEBUG) std::cout << " - Leído Term 2...\n";
 
-	 };
+	};
 
 Factor : Ref {
+		if(DEBUG) std::cout << " - Leído Factor 1...\n";
 	
-}
-	   | id punto_ nextInt_ pari_ pard_ {
+	}
+	| id punto_ nextInt_ pari_ pard_ {
+		if(DEBUG) std::cout << " - Leído Factor 2...\n";
 
-	   }
-	   | id punto_ nextDouble_ pari_ pard_ {
+	}
+	| id punto_ nextDouble_ pari_ pard_ {
+		if(DEBUG) std::cout << " - Leído Factor 3...\n";
 
-	   }
-	   | nentero {
-	   		int tmp 	= NTemp();
-	   		$$.tipo = ENTERO;
-	   		$$.dir 	= tmp;
-	   		$$.cod 	= $1.lexema;
-	   }
-	   | nreal {
-	   		int tmp 	= NTemp();
-	   		$$.tipo = REAL;
-	   		$$.dir 	= tmp;
-	   		$$.cod 	= $1.lexema;
-	   }
-	   | true_ {
-	   		int tmp 	= NTemp();
-	   		$$.tipo = BOOLEANO;
-	   		$$.dir 	= tmp;
-	   		$$.cod 	= "0";
-	   }
-	   | false_ {
-	   		int tmp = NTemp();
-	   		$$.tipo = BOOLEANO;
-	   		$$.dir 	= tmp;
-	   		$$.cod 	= "1";
-	   }
-	   | pari_ Expr pard_ {
+	}
+	| nentero {
+		if(DEBUG) std::cout << " - Leído Factor 4...\n";
 
-	   }
-	   | not_ Factor {
+		int tmp 	= NTemp();
+		$$.tipo = ENTERO;
+		$$.dir 	= tmp;
+		$$.cod 	= $1.lexema;
+	}
+	| nreal {
+		if(DEBUG) std::cout << " - Leído Factor 5...\n";
 
-	   }
-	   | pari_ Tipo pard_ Expr {
+		int tmp 	= NTemp();
+		$$.tipo = REAL;
+		$$.dir 	= tmp;
+		$$.cod 	= $1.lexema;
+	}
+	| true_ {
+		if(DEBUG) std::cout << " - Leído Factor 6...\n";
 
-	   };
+		int tmp 	= NTemp();
+		$$.tipo = BOOLEANO;
+		$$.dir 	= tmp;
+		$$.cod 	= "0";
+	}
+	| false_ {
+		if(DEBUG) std::cout << " - Leído Factor 7...\n";
+
+		int tmp = NTemp();
+		$$.tipo = BOOLEANO;
+		$$.dir 	= tmp;
+		$$.cod 	= "1";
+	}
+	| pari_ Expr pard_ {
+		if(DEBUG) std::cout << " - Leído Factor 8...\n";
+
+	}
+	| not_ Factor {
+		if(DEBUG) std::cout << " - Leído Factor 9...\n";
+
+	}
+	| pari_ Tipo pard_ Expr {
+		if(DEBUG) std::cout << " - Leído Factor 10...\n";
+
+	};
 
 Ref : id {
-  
-  simbolo_t s;
-  $$.tipo = buscarTipoSimbolo($1.lexema);
-  int tmp = NTemp();
-  $$.dir = tmp;
-  $$.dBase = buscarDir($1.lexema);
-  $$.cod = "mov #0 " + tmp;
+		if(DEBUG) std::cout << " - Leído Ref 1...\n";
 
-}
-   | Ref cori_ {if(esBase($1.tipo)) msgError(1,1,1,"");}
-    Esimple cord_ {
-      if(!esBase($4.tipo)){ msgError(ERR_EXP_ENT,1,1,"");}
-      else{
-        $$.tipo = tipoBase($1.tipo);
-        int tmp = NTemp();
-        $$.dir = tmp;
-        $$.dBase = $1.dBase;
-        //$$.cod = $1.cod + $4.cod + "mov #" + tamTipo($1.tipo) + "\naddi " + $4.dir + "\nmov A " + tmp;
-      }
-
-  };
+		simbolo_t s;
+		$$.tipo = buscarTipoSimbolo($1.lexema);
+		int tmp = NTemp();
+		$$.dir = tmp;
+		$$.dBase = buscarDir($1.lexema);
+		$$.cod = "mov #0 " + tmp;
+	}
+	| Ref cori_ {if(esBase($1.tipo)) msgError(1,1,1,"");} Esimple cord_ {
+		if(DEBUG) std::cout << " - Leído Ref 2...\n";
+		if(!esBase($4.tipo)){ msgError(ERR_EXP_ENT,1,1,"");}
+		else {
+			$$.tipo = tipoBase($1.tipo);
+			int tmp = NTemp();
+			$$.dir = tmp;
+			$$.dBase = $1.dBase;
+			//$$.cod = $1.cod + $4.cod + "mov #" + tamTipo($1.tipo) + "\naddi " + $4.dir + "\nmov A " + tmp;
+		}
+	};
   
 	
 %%
@@ -539,7 +579,13 @@ int buscarDir(const char* lexema){
 		return s.dir;
 
 }
+
 void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
+	if(DEBUG) std::cout << "*NUEVO SIMBOLO* Simbolo: " << lexema << 
+    "\tIdx.Tipo: " << idTipo << 
+    "\tDir.: " << ptr_mem <<
+    "\tArray? " << esArray << "\n";
+
   if(!existeSimbolo(lexema))  // Si no existe
   {
     simbolo_t s;
@@ -614,9 +660,6 @@ int getDir() {
 }
 
 int NTemp(){
-
-
-    cout << "Holaaaa";
 	ptr_mem_temp ++;
 
 	if(ptr_mem_temp >= MAX_POS_MEM)
@@ -710,6 +753,11 @@ void print_tabla_simbolos() {
 
 int nuevoTipo(int tam,int tipo_base) {
   
+	if(DEBUG) std::cout << "*NUEVO TIPO* Pos: " << contIdType << 
+            "\tTipo: " << contIdType + 1 << 
+            "\tTam: " << tam <<
+            "\tT.Base: " << tipo_base << "\n";
+
   tipo_t t;
  /*switch(tipo_base)
   {
