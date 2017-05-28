@@ -406,56 +406,63 @@ Term : Term mulop_ Factor {
 		if(DEBUG) std::cout << " - Leído Term 2...\n";
 
 	};
+
 Factor : Ref {
 		if(DEBUG) std::cout << " - Leído Factor 1...\n";
-	
+		$$.tipo = $1.tipo;
+		$$.dir 	= $1.dir;
+		$$.cod 	= $1.cod;
 	}
 	| id punto_ nextInt_ pari_ pard_ {
 		if(DEBUG) std::cout << " - Leído Factor 2...\n";
+		simbolo_t simbolo;
+		simbolo.lexema = $1.lexema;
+		buscarSimbolo(simbolo);
+		if(simbolo.idTipo != SCANNER) msgError(ERR_NOSC,nlin,ncol,$1.lexema);
 
 	}
 	| id punto_ nextDouble_ pari_ pard_ {
 		if(DEBUG) std::cout << " - Leído Factor 3...\n";
 
+		simbolo_t simbolo;
+		simbolo.lexema = $1.lexema;
+		buscarSimbolo(simbolo);
+		if(simbolo.idTipo != SCANNER) msgError(ERR_NOSC,nlin,ncol,$1.lexema);
+
 	}
 	| nentero {
 		if(DEBUG) std::cout << " - Leído Factor 4...\n";
-
-		int tmp 	= NTemp();
+		int tmp = NTemp();
 		$$.tipo = ENTERO;
 		$$.dir 	= tmp;
-		$$.cod 	= $1.lexema;
+		$$.cod 	= std::string("mov #") + $1.lexema + " A\n";
 	}
 	| nreal {
 		if(DEBUG) std::cout << " - Leído Factor 5...\n";
-
-		int tmp 	= NTemp();
+		int tmp = NTemp();
 		$$.tipo = REAL;
 		$$.dir 	= tmp;
-		$$.cod 	= $1.lexema;
+		$$.cod 	= std::string("mov #") + $1.lexema + " A\n";
 	}
 	| true_ {
 		if(DEBUG) std::cout << " - Leído Factor 6...\n";
-
-		int tmp 	= NTemp();
-		$$.tipo = BOOLEANO;
-		$$.dir 	= tmp;
-		$$.cod 	= "0";
-	}
-	| false_ {
-		if(DEBUG) std::cout << " - Leído Factor 7...\n";
-
 		int tmp = NTemp();
 		$$.tipo = BOOLEANO;
 		$$.dir 	= tmp;
-		$$.cod 	= "1";
+		$$.cod 	= "mov #0 A\n";
+	}
+	| false_ {
+		if(DEBUG) std::cout << " - Leído Factor 7...\n";
+		int tmp = NTemp();
+		$$.tipo = BOOLEANO;
+		$$.dir 	= tmp;
+		$$.cod 	= "mov #1 A\n";
 	}
 	| pari_ Expr pard_ {
 		if(DEBUG) std::cout << " - Leído Factor 8...\n";
 		$$.tipo = $2.tipo;
 		$$.dir 	= $2.dir;
 		$$.cod 	= $2.cod;
-
 	}
 	| not_ Factor {
 		if(DEBUG) std::cout << " - Leído Factor 9...\n";
@@ -464,52 +471,54 @@ Factor : Ref {
 		$$.dir 	= tmp;
 		$$.cod 	= $2.cod
 					+ "noti\n"
-					+ "mov A " + tmp + "\n";
+					+ "mov A " + IntToString(tmp) + "\n";
 	}
-	| pari_ Tipo pard_ Expr {
+	| pari_ Tipo { if(!esBase($2.tipo)) msgError(ERR_TIPOS,nlin,ncol,$2.lexema); } pard_ Expr {
 		if(DEBUG) std::cout << " - Leído Factor 10...\n";
-		if($2.tipo != $4.tipo) {
-			$$.tipo = $4.tipo;
-			$$.dir 	= $4.dir;
-			$$.cod 	= $4.cod;
+
+		if(!esBase($5.tipo)) msgError(ERR_TIPOS,nlin,ncol,$5.lexema);
+
+		if($2.tipo == $5.tipo) {
+			$$.tipo = $5.tipo;
+			$$.dir 	= $5.dir;
+			$$.cod 	= $5.cod;
 		} else {
 			int tmp = NTemp();
 			$$.tipo = $2.tipo;
 			$$.dir 	= tmp;
 
-			if($4.tipo == BOOLEAN) {
+			if($5.tipo == BOOLEANO) {
 				if($2.tipo == ENTERO) {
-					$$.cod 	= $4.cod
+					$$.cod 	= $5.cod
 								+ "ori #0\n"
-								+ "mov A" + tmp + "\n";
+								+ "mov A" + IntToString(tmp) + "\n";
 				} else {
-					$$.cod 	= $4.cod
+					$$.cod 	= $5.cod
 								+ "orr #0\n"
-								+ "mov A" + tmp + "\n";
+								+ "mov A" + IntToString(tmp) + "\n";
 				}
-			} else if($4.tipo == ENTERO) {
-				if($2.tipo == BOOLEAN) {
-						$$.cod 	= $4.cod
+			} else if($5.tipo == ENTERO) {
+				if($2.tipo == BOOLEANO) {
+						$$.cod 	= $5.cod
 									+ "andi #1\n"
-									+ "mov A" + tmp + "\n";
+									+ "mov A" + IntToString(tmp) + "\n";
 				} else {
-					$$.cod 	= $4.cod
+					$$.cod 	= $5.cod
 								+ "itor\n"
-								+ "mov A" + tmp + "\n";
+								+ "mov A" + IntToString(tmp) + "\n";
 				}
 			} else {
-				if($2.tipo == BOOLEAN) {
-						$$.cod 	= $4.cod
+				if($2.tipo == BOOLEANO) {
+						$$.cod 	= $5.cod
 									+ "andr #1\n"
-									+ "mov A" + tmp + "\n";
+									+ "mov A" + IntToString(tmp) + "\n";
 				} else {
-					$$.cod 	= $4.cod
+					$$.cod 	= $5.cod
 								+ "rtoi\n"
-								+ "mov A" + tmp + "\n";
-					}
+								+ "mov A" + IntToString(tmp) + "\n";
+				}
 			}
 		}
-
 	};
 
 Ref : id {
