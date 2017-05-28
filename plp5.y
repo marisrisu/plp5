@@ -196,7 +196,8 @@ SecImp : SecImp punto_ id {
 Class : public_ class_ id llavei_ Main llaved_ {
 		//No hace nada?
 		if(DEBUG) std::cout << " - Leído Class...\n";
-	
+		print_tabla_simbolos();
+		print_tabla_tipos();
 };
 
 Main : public_ static_ void_ main_ pari_ string_ cori_ cord_ id pard_ Bloque  {
@@ -246,13 +247,12 @@ BDecl : BDecl DVar {
 	  
 	  };
 
-DVar : Tipo LIdent pyc_ {
+DVar : Tipo {$$.tipo = $1.tipo;} LIdent pyc_ {
 		if(DEBUG) std::cout << " - Leído DVar 1...\n";
 	    ptr_label = NTemp();
 	    $$.dir = ptr_label;
 	    $$.tipo = $1.tipo;
-	    nuevoSimbolo($2.lexema,false, $1.tipo,nlin,ncol );
-	    print_tabla_simbolos();
+
     }
     | Tipo DimSN id asig_ new_ Tipo {if($1.tipo != $6.tipo) msgError(ERR_TIPOSDECLARRAY, nlin,ncol,$1.lexema); $$.tipo = $1.tipo;} Dimensiones pyc_ {
 		if(DEBUG) std::cout << " - Leído DVar 2...\n";
@@ -260,12 +260,16 @@ DVar : Tipo LIdent pyc_ {
 		$$.dir = ptr_label;
 		$$.tipo = $1.tipo;
 		nuevoSimbolo($3.lexema, true, $8.tipo, nlin, ncol-strlen(yytext));
-		print_tabla_simbolos();
-		print_tabla_tipos();
+
 
    }
     | scanner_ id asig_ new_ scanner_ pari_ system_ punto_ in_ pard_ pyc_ {
 		if(DEBUG) std::cout << " - Leído DVar 3...\n";
+		ptr_label = NTemp();
+		$$.dir = ptr_label;
+		$$.tipo = SCANNER;
+		nuevoSimbolo($2.lexema, false, SCANNER, nlin, ncol);
+
    };
 
 DimSN : DimSN cori_ cord_ {
@@ -296,12 +300,15 @@ LIdent : LIdent coma_ Variable {
 		ptr_label = NTemp();
 		$$.dir = ptr_label;
 		$$.lexema = $3.lexema;
+		nuevoSimbolo($3.lexema,false, $0.tipo,nlin,ncol );
+
 	}
-	| Variable {
+	| {$$.tipo = $0.tipo;} Variable {
 		if(DEBUG) std::cout << " - Leído LIdent 2...\n";
 		ptr_label = NTemp();
 		$$.dir = ptr_label;
-		$$.lexema = $1.lexema;
+		$$.lexema = $2.lexema;
+		nuevoSimbolo($$.lexema, false, $0.tipo, nlin,ncol);
 	};
 
 Variable : id {
@@ -399,7 +406,6 @@ Term : Term mulop_ Factor {
 		if(DEBUG) std::cout << " - Leído Term 2...\n";
 
 	};
-
 Factor : Ref {
 		if(DEBUG) std::cout << " - Leído Factor 1...\n";
 	
@@ -500,7 +506,7 @@ Factor : Ref {
 					$$.cod 	= $4.cod
 								+ "rtoi\n"
 								+ "mov A" + tmp + "\n";
-
+					}
 			}
 		}
 
@@ -532,7 +538,7 @@ Ref : id {
 %%
 bool esBase(int tipo)
 {
-  if(tipo <= 3)
+  if(tipo <= 4)
     return true;
   else return false;
 }
@@ -650,27 +656,40 @@ void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
     s.dir       = ptr_mem;
     s.idTipo    = idTipo;
     s.esArray   = esArray;
-    
+   
       if(!s.esArray) {
         switch(idTipo) {
           case ENTERO: 
-            s.idTipo = 0;
+            s.idTipo = ENTERO;
             break;
           case REAL:
-            s.idTipo = 1;
+            s.idTipo =REAL;
             break;
           case BOOLEANO:
-            s.idTipo = 2;
+            s.idTipo = BOOLEANO;
             break;
           case SCANNER:
-            s.idTipo = 3;
+            s.idTipo = SCANNER;
             break;
-        }     
+        }  
+
+        ptr_mem += obj_tipo.size;
+
+
+      }else if (s.esArray){
+      	cout << "hola";
+      	int var  = obj_tipo.size;
+      	tipo_t tipo;
+      	buscarTipo(obj_tipo.tipo_base,tipo);
+      	var *= tipo.size;
+      	while(!esBase(tipo.tipo_base)){
+      		
+      		var *= tipo.size;
+      		buscarTipo(obj_tipo.tipo_base,tipo);
+      		  }
+
+      	ptr_mem += var;
       }
-
-
-    ptr_mem += obj_tipo.size;
-
     if(ptr_mem > MAX_MEM)   // Si no cabe en memoria..
       msgError(ERR_NOCABE, lin, col, lexema);    // error, memoria llena  
 
@@ -681,11 +700,15 @@ void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
 }
 
 bool existeSimbolo(const char* simbolo) {
+  		
+  if(DEBUG) std::cout << " - Existe simbolo ...\n " ;
+
   std::vector<simbolo_t>::iterator begin_it = simbolos.begin();
   std::vector<simbolo_t>::iterator end_it   = simbolos.end();
   std::vector<simbolo_t>::iterator it       = std::find_if(begin_it,end_it, find_simbolo(std::string(simbolo))); 
 
   return it != end_it;
+
 }
 bool buscarSimbolo(simbolo_t& simbolo) {    // simbolo debe llegar con el lexema y volvera con todos los atributos
   
@@ -722,6 +745,7 @@ int NTemp(){
 
 
 int buscarTipoSimbolo(const char * lexema) {
+  
   simbolo_t simbolo;
   simbolo.lexema = lexema;
   buscarSimbolo(simbolo);
@@ -730,12 +754,12 @@ int buscarTipoSimbolo(const char * lexema) {
 
 bool buscarTipo(int tipo_buscado, tipo_t& t) {
   std::vector<tipo_t>::iterator it_tipos;
-
   for(it_tipos = tabla_tipos.begin(); it_tipos != tabla_tipos.end(); ++it_tipos) {
     if(it_tipos->tipo == tipo_buscado) {
       t.tipo      = it_tipos->tipo;
       t.size      = it_tipos->size;
       t.tipo_base = it_tipos->tipo_base;
+        if(DEBUG) std::cout << " -FOR ...\n " ;
 
       return true;
     }
