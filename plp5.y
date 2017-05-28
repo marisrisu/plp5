@@ -207,8 +207,8 @@ Main : public_ static_ void_ main_ pari_ string_ cori_ cord_ id pard_ Bloque  {
 
 Tipo : int_ {
 		if(DEBUG) std::cout << " - Leído Tipo 1...\n";
-		int tmp = NTemp();
-		$$.dir = tmp;
+		ptr_label = NTemp();
+		$$.dir = ptr_label;
 		$$.nlin = nlin;
 		$$.ncol = ncol;
 		$$.tipo = ENTERO;
@@ -216,16 +216,16 @@ Tipo : int_ {
 	}
 	  | double_ {
 		if(DEBUG) std::cout << " - Leído Tipo 2...\n";
-		int tmp = NTemp();
-		$$.dir = tmp;
+		ptr_label = NTemp();
+		$$.dir = ptr_label;
 		$$.tipo = REAL;
 		$$.nlin = nlin;
 		$$.ncol = ncol;
 	 }
 	  | boolean_ {
 		if(DEBUG) std::cout << " - Leído Tipo 3...\n";
-	  	int tmp = NTemp();
-		$$.dir = tmp;
+	  	ptr_label = NTemp();
+		$$.dir = ptr_label;
 		$$.tipo = BOOLEANO;
 		$$.nlin = nlin;
 		$$.ncol = ncol;
@@ -239,17 +239,20 @@ Bloque : llavei_ BDecl SeqInstr llaved_ {
 
 BDecl : BDecl DVar {
 		if(DEBUG) std::cout << " - Leído BDecl 1...\n";
+
 }
 	   | {
 		if(DEBUG) std::cout << " - Leído BDecl 2...\n";
 	  
 	  };
 
-DVar : Tipo {$$.tipo = $1.tipo; } LIdent pyc_ {
+DVar : Tipo LIdent pyc_ {
 		if(DEBUG) std::cout << " - Leído DVar 1...\n";
 	    ptr_label = NTemp();
 	    $$.dir = ptr_label;
 	    $$.tipo = $1.tipo;
+	    nuevoSimbolo($2.lexema,false, $1.tipo,nlin,ncol );
+	    print_tabla_simbolos();
     }
     | Tipo DimSN id asig_ new_ Tipo {if($1.tipo != $6.tipo) msgError(ERR_TIPOSDECLARRAY, nlin,ncol,$1.lexema); $$.tipo = $1.tipo;} Dimensiones pyc_ {
 		if(DEBUG) std::cout << " - Leído DVar 2...\n";
@@ -287,16 +290,18 @@ Dimensiones : cori_ nentero cord_ {$$.tipo = $0.tipo; } Dimensiones {
       };
 
 
-LIdent : { $$.tipo = $0.tipo;} LIdent coma_ Variable {
+LIdent : LIdent coma_ Variable {
+
 		if(DEBUG) std::cout << " - Leído LIdent 1...\n";
 		ptr_label = NTemp();
 		$$.dir = ptr_label;
+		$$.lexema = $3.lexema;
 	}
-	| { $$.tipo = $0.tipo; } Variable {
+	| Variable {
 		if(DEBUG) std::cout << " - Leído LIdent 2...\n";
 		ptr_label = NTemp();
 		$$.dir = ptr_label;
-		print_tabla_simbolos();
+		$$.lexema = $1.lexema;
 	};
 
 Variable : id {
@@ -304,9 +309,7 @@ Variable : id {
 
 	ptr_label = NTemp();
 	$$.dir = ptr_label;
-	$$.tipo = $0.tipo;
-	print_tabla_simbolos();
-	nuevoSimbolo($1.lexema,false, $0.tipo,nlin,ncol );
+	$$.lexema = $1.lexema;
 };
 
 
