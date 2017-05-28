@@ -404,7 +404,9 @@ Term : Term mulop_ Factor {
 	}
 	| Factor {
 		if(DEBUG) std::cout << " - Leído Term 2...\n";
-
+		$$.tipo = $1.tipo;
+		$$.dir 	= $1.dir;
+		$$.cod 	= $1.cod;
 	};
 
 Factor : Ref {
@@ -420,15 +422,22 @@ Factor : Ref {
 		buscarSimbolo(simbolo);
 		if(simbolo.idTipo != SCANNER) msgError(ERR_NOSC,nlin,ncol,$1.lexema);
 
+		int tmp = NTemp();
+		$$.tipo = ENTERO;
+		$$.dir 	= tmp;
+		$$.cod 	= "rdi " + IntToString(tmp) + "\n";
 	}
 	| id punto_ nextDouble_ pari_ pard_ {
 		if(DEBUG) std::cout << " - Leído Factor 3...\n";
-
 		simbolo_t simbolo;
 		simbolo.lexema = $1.lexema;
 		buscarSimbolo(simbolo);
 		if(simbolo.idTipo != SCANNER) msgError(ERR_NOSC,nlin,ncol,$1.lexema);
 
+		int tmp = NTemp();
+		$$.tipo = REAL;
+		$$.dir 	= tmp;
+		$$.cod 	= "rdr " + IntToString(tmp) + "\n";
 	}
 	| nentero {
 		if(DEBUG) std::cout << " - Leído Factor 4...\n";
