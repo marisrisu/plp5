@@ -446,14 +446,63 @@ Factor : Ref {
 	}
 	| pari_ Expr pard_ {
 		if(DEBUG) std::cout << " - Leído Factor 8...\n";
+		$$.tipo = $2.tipo;
+		$$.dir 	= $2.dir;
+		$$.cod 	= $2.cod;
 
 	}
 	| not_ Factor {
 		if(DEBUG) std::cout << " - Leído Factor 9...\n";
-
+		int tmp = NTemp();
+		$$.tipo = $2.tipo;
+		$$.dir 	= tmp;
+		$$.cod 	= $2.cod
+					+ "noti\n"
+					+ "mov A " + tmp + "\n";
 	}
 	| pari_ Tipo pard_ Expr {
 		if(DEBUG) std::cout << " - Leído Factor 10...\n";
+		if($2.tipo != $4.tipo) {
+			$$.tipo = $4.tipo;
+			$$.dir 	= $4.dir;
+			$$.cod 	= $4.cod;
+		} else {
+			int tmp = NTemp();
+			$$.tipo = $2.tipo;
+			$$.dir 	= tmp;
+
+			if($4.tipo == BOOLEAN) {
+				if($2.tipo == ENTERO) {
+					$$.cod 	= $4.cod
+								+ "ori #0\n"
+								+ "mov A" + tmp + "\n";
+				} else {
+					$$.cod 	= $4.cod
+								+ "orr #0\n"
+								+ "mov A" + tmp + "\n";
+				}
+			} else if($4.tipo == ENTERO) {
+				if($2.tipo == BOOLEAN) {
+						$$.cod 	= $4.cod
+									+ "andi #1\n"
+									+ "mov A" + tmp + "\n";
+				} else {
+					$$.cod 	= $4.cod
+								+ "itor\n"
+								+ "mov A" + tmp + "\n";
+				}
+			} else {
+				if($2.tipo == BOOLEAN) {
+						$$.cod 	= $4.cod
+									+ "andr #1\n"
+									+ "mov A" + tmp + "\n";
+				} else {
+					$$.cod 	= $4.cod
+								+ "rtoi\n"
+								+ "mov A" + tmp + "\n";
+
+			}
+		}
 
 	};
 
