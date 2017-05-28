@@ -398,9 +398,39 @@ Esimple : Esimple addop_ Term {
 
 	};
 
-Term : Term mulop_ Factor {
+Term : Term mulop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR_NUM, nlin, ncol, $2.lexema); } Factor {
 		if(DEBUG) std::cout << " - Leído Term 1...\n";
-		
+		if($4.tipo != ENTERO && $4.tipo != REAL) msgError(ERR_NUM, nlin, ncol, $2.lexema);
+		int tmp = NTemp();
+		$$.dir 	= tmp;
+
+		if($1.tipo = $4.tipo) {
+			$$.tipo = $4.tipo;
+
+			if($1.tipo == ENTERO) {
+				$$.cod = $1.cod
+							+ "muli " + IntToString($4.dir) + "\n"
+							+ "mov A " + IntToString(tmp);
+			} else {
+				$$.cod = $1.cod
+							+ "mulr " + IntToString($4.dir) + "\n"
+							+ "mov A " + IntToString(tmp);
+			}
+		} else {
+			$$.tipo = REAL;
+
+			if($1.tipo == ENTERO) {
+				$$.cod = $1.cod
+							+ "itor\n"
+							+ "mulr " + IntToString($4.dir) + "\n"
+							+ "mov A " + IntToString(tmp);
+			} else {
+				$$.cod = $4.cod
+							+ "itor\n"
+							+ "muli " + IntToString($1.dir) + "\n"
+							+ "mov A " + IntToString(tmp);
+			}
+		}
 	}
 	| Factor {
 		if(DEBUG) std::cout << " - Leído Term 2...\n";
