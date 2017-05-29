@@ -290,7 +290,6 @@ Dimensiones : cori_ nentero cord_ {$$.tipo = $0.tipo; } Dimensiones {
         ptr_label = NTemp();
         $$.dir = ptr_label;
         $$.tipo = nuevoTipo(std::atoi($2.lexema), $0.tipo);
-
       };
 
 
@@ -338,11 +337,25 @@ Instr : pyc_ {
 
 	}
 	| Ref asig_ Expr pyc_ {
-		if(DEBUG) std::cout << " - Leído Instr 3...\n";	
 
+		if(DEBUG) std::cout << " - Leído Instr 3...\n";	
+		if($1.tipo == ENTERO && $3.tipo == REAL){
+			msgError(ERR_TIPOSASIG,nlin,ncol,"");
+		}//falta scanner.
+		else{
+		
+		$$.cod = $3.cod;
+		 if($1.tipo == REAL && $3.tipo == ENTERO){ //itor
+		 	$$.cod += "\nitor";
+		 }
+
+		 $$.cod += "\nmov " + IntToString($3.dir) + " " + IntToString($1.dir);
+		 $$.dir = $3.dir;
+		}
 	}
 	| system_ punto_ out_ punto_ println_ pari_ Expr pard_ pyc_ {
 		if(DEBUG) std::cout << " - Leído Instr 4...\n";	
+
 
 	}
 	| system_ punto_ out_ punto_ print_ pari_ Expr pard_ pyc_ {
@@ -564,11 +577,16 @@ Ref : id {
 		if(DEBUG) std::cout << " - Leído Ref 1...\n";
 
 		simbolo_t s;
-		$$.tipo = buscarTipoSimbolo($1.lexema);
-		int tmp = NTemp();
-		$$.dir = tmp;
-		$$.dBase = buscarDir($1.lexema);
-		$$.cod = "mov #0 " + tmp;
+		s.lexema = $1.lexema;
+		if(buscarSimbolo(s)){
+			$$.tipo = buscarTipoSimbolo($1.lexema);
+			int tmp = NTemp();
+			$$.dir = tmp;
+			$$.dBase = buscarDir($1.lexema);
+			//$$.cod = "mov #0 " + tmp;
+		}else{
+			msgError(ERRNODECL,nlin,ncol, $1.lexema);
+		}
 	}
 	| Ref cori_ {if(esBase($1.tipo)) msgError(1,1,1,"");} Esimple cord_ {
 		if(DEBUG) std::cout << " - Leído Ref 2...\n";
