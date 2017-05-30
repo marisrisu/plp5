@@ -1,4 +1,4 @@
-mov #7.5 A
+mov $7.5 A
 mov A 0
 mov 0 A
 rtoi
@@ -6,18 +6,14 @@ mov A 16013
 mov A 2
 mov 2 A
 gtrr 16014
-mov A 16015
-mov 16015 A
+mov 2 A
 jz 0
 mov 2 A
-addi 16026
-mov A 16027
+addi 16021
 mov A 3
 mov 3 A
-divi 16028
-mov A 16029
-divi 16030
-mov A 16031
+divi 16024
+divi 16025
 mov A 4
 mov 4 A
 wri A 
