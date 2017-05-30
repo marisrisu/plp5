@@ -118,6 +118,8 @@ void destroy();
 int NTemp();
 int getDir();
 std::string relopToM2R(const char *relop, int tipo);
+std::string addopToM2R(const char *relop, int tipo);
+std::string mulopToM2R(const char *relop, int tipo);
 // Variables globales
 struct tabla_simbolos_t* ambito;
 
@@ -743,12 +745,12 @@ std::string relopToM2R(const char *relop, int tipo) {
 		case REAL:		t = 'r';	break;
 	}
 
-	if(strcmp(relop, "=="))			return std::string("eql") + t + " "; 
-	else if(strcmp(relop, "!="))	return std::string("neq") + t + " "; 
-	else if(strcmp(relop, "<"))		return std::string("lss") + t + " "; 
-	else if(strcmp(relop, "<="))	return std::string("leq") + t + " "; 
-	else if(strcmp(relop, ">"))		return std::string("gtr") + t + " "; 
-	else if(strcmp(relop, ">="))	return std::string("geq") + t + " ";
+	if(!strcmp(relop, "=="))			return std::string("eql") + t + " "; 
+	else if(!strcmp(relop, "!="))	return std::string("neq") + t + " "; 
+	else if(!strcmp(relop, "<"))		return std::string("lss") + t + " "; 
+	else if(!strcmp(relop, "<="))	return std::string("leq") + t + " "; 
+	else if(!strcmp(relop, ">"))		return std::string("gtr") + t + " "; 
+	else if(!strcmp(relop, ">="))	return std::string("geq") + t + " ";
 
 	return "";
 }
@@ -762,12 +764,8 @@ std::string addopToM2R(const char *addop, int tipo) {
 		case REAL:		t = 'r';	break;
 	}
 
-	if(strcmp(addop, "=="))			return std::string("eql") + t + " "; 
-	else if(strcmp(addop, "!="))	return std::string("neq") + t + " "; 
-	else if(strcmp(addop, "<"))		return std::string("lss") + t + " "; 
-	else if(strcmp(addop, "<="))	return std::string("leq") + t + " "; 
-	else if(strcmp(addop, ">"))		return std::string("gtr") + t + " "; 
-	else if(strcmp(addop, ">="))	return std::string("geq") + t + " ";
+	if(!strcmp(addop, "+"))			return std::string("add") + t + " ";
+	else if(!strcmp(addop, "-"))	return std::string("sub") + t + " ";
 
 	return "";
 }
@@ -781,12 +779,8 @@ std::string mulopToM2R(const char *mulop, int tipo) {
 		case REAL:		t = 'r';	break;
 	}
 
-	if(strcmp(mulop, "=="))			return std::string("eql") + t + " "; 
-	else if(strcmp(mulop, "!="))	return std::string("neq") + t + " "; 
-	else if(strcmp(mulop, "<"))		return std::string("lss") + t + " "; 
-	else if(strcmp(mulop, "<="))	return std::string("leq") + t + " "; 
-	else if(strcmp(mulop, ">"))		return std::string("gtr") + t + " "; 
-	else if(strcmp(mulop, ">="))	return std::string("geq") + t + " ";
+	if(!strcmp(mulop, "*"))			return std::string("mul") + t + " "; 
+	else if(!strcmp(mulop, "/"))	return std::string("div") + t + " ";
 
 	return "";
 }
