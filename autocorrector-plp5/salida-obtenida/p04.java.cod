@@ -1,2 +1,75 @@
 6 dimsm
 6 dimensiones
+############ TABLA DE TIPOS ############
+Pos: 0	Tipo: 1	Tam: 1	T.Base: -1
+Pos: 1	Tipo: 2	Tam: 1	T.Base: -1
+Pos: 2	Tipo: 3	Tam: 1	T.Base: -1
+Pos: 3	Tipo: 4	Tam: 1	T.Base: -1
+Pos: 4	Tipo: 5	Tam: 1	T.Base: 1
+Pos: 5	Tipo: 6	Tam: 2	T.Base: 5
+Pos: 6	Tipo: 7	Tam: 1	T.Base: 6
+Pos: 7	Tipo: 8	Tam: 1	T.Base: 7
+Pos: 8	Tipo: 9	Tam: 2	T.Base: 8
+Pos: 9	Tipo: 10	Tam: 1	T.Base: 9
+########################################
+############ TABLA DE SIMBOLOS ############
+Pos.: 0	Simbolo: b	Idx.Tipo: 1	Dir.: 0	Array? 0
+###########################################
+Este es el tipo con el que voy a add simbolo a
+mov #1 A
+subi 16015
+mov A 16016
+addi 16021
+mov A 16022
+mov A 0
+mov 0 A
+mov A 16034
+mov 0 A
+addi 16047
+mov A 16048
+mov A 16046
+mov 0 A
+addi 16061
+mov A 16062
+mov A 16060
+mov 0 A
+addi 16075
+mov A 16076
+mov A 16074
+mov 0 A
+wri A 
+wrl
+mov 1 A
+mov #0 A
+mov 1 A
+muli #1
+addi 16077
+mov #1 A
+mov 16078 A
+muli #1
+addi 16079
+mov #0 A
+mov 16080 A
+muli #1
+addi 16081
+mov #0 A
+mov 16082 A
+muli #1
+addi 16083
+mov #1 A
+mov 16084 A
+muli #1
+addi 16085
+mov #0 A
+mov 16086 A
+muli #1
+addi 16087
+addi 16100
+mov A 16101
+addi 16113
+mov A 16114
+addi 16126
+mov A 16127
+wri A 
+wrl
+halt

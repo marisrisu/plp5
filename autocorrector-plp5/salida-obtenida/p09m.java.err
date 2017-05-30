@@ -1,1 +1,1 @@
-ERROR, tiempo de ejecución agotado... (15 segundos)
+Error semantico (10,39): la variable 'a' ya no cabe en memoria

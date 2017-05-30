@@ -1,2 +1,37 @@
 7 dimsm
 7 dimensiones
+############ TABLA DE TIPOS ############
+Pos: 0	Tipo: 1	Tam: 1	T.Base: -1
+Pos: 1	Tipo: 2	Tam: 1	T.Base: -1
+Pos: 2	Tipo: 3	Tam: 1	T.Base: -1
+Pos: 3	Tipo: 4	Tam: 1	T.Base: -1
+Pos: 4	Tipo: 5	Tam: 1	T.Base: 1
+Pos: 5	Tipo: 6	Tam: 2	T.Base: 5
+Pos: 6	Tipo: 7	Tam: 3	T.Base: 6
+Pos: 7	Tipo: 8	Tam: 4	T.Base: 7
+Pos: 8	Tipo: 9	Tam: 3	T.Base: 8
+Pos: 9	Tipo: 10	Tam: 2	T.Base: 9
+Pos: 10	Tipo: 11	Tam: 1	T.Base: 10
+########################################
+############ TABLA DE SIMBOLOS ############
+###########################################
+Este es el tipo con el que voy a add simbolo a
+mov 0 A
+mov #0 A
+mov 0 A
+muli #1
+addi 16015
+mov #1 A
+mov 16016 A
+muli #1
+addi 16017
+mov #2 A
+mov 16018 A
+muli #1
+addi 16019
+mov #3 A
+mov 16020 A
+muli #1
+addi 16021
+mov A 576
+halt

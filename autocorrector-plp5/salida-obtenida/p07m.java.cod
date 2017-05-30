@@ -1,2 +1,18 @@
 6 dimsm
 6 dimensiones
+############ TABLA DE TIPOS ############
+Pos: 0	Tipo: 1	Tam: 1	T.Base: -1
+Pos: 1	Tipo: 2	Tam: 1	T.Base: -1
+Pos: 2	Tipo: 3	Tam: 1	T.Base: -1
+Pos: 3	Tipo: 4	Tam: 1	T.Base: -1
+Pos: 4	Tipo: 5	Tam: 0	T.Base: 1
+Pos: 5	Tipo: 6	Tam: 1	T.Base: 5
+Pos: 6	Tipo: 7	Tam: 2	T.Base: 6
+Pos: 7	Tipo: 8	Tam: 3	T.Base: 7
+Pos: 8	Tipo: 9	Tam: 4	T.Base: 8
+Pos: 9	Tipo: 10	Tam: 5	T.Base: 9
+########################################
+############ TABLA DE SIMBOLOS ############
+###########################################
+Este es el tipo con el que voy a add simbolo a
+halt

@@ -260,10 +260,13 @@ DVar : Tipo {$$.tipo = $1.tipo;} LIdent pyc_ {
 		if(DEBUG) std::cout << " - Leído DVar 2...\n";
 		cout << $2.dir << " dimsm"<<endl;
 		cout << $8.dBase << " dimensiones"<<endl;
+		print_tabla_tipos();
+		print_tabla_simbolos();
 		if($2.dir != $8.dBase) msgError(ERR_DIMSDECLARRAY,nlin,ncol, $3.lexema);
 		ptr_label = NTemp();
 		$$.dir = ptr_label;
 		$$.tipo = $1.tipo;
+		cout << "Este es el tipo con el que voy a add simbolo "<<$3.lexema <<endl; 
 		nuevoSimbolo($3.lexema, true, $8.tipo, nlin, ncol-strlen(yytext));
 
 
@@ -696,7 +699,7 @@ Ref : id {
 				$$.cod = "mov "+ IntToString(s.dir) + " A\n";
 		}
 	}
-	| Ref cori_ {if(esBase($1.tipo)) msgError(ERRFALTAN,nlin,ncol,"");} 
+	| Ref cori_ {if($1.esArray) msgError(ERRFALTAN,nlin,ncol,"");} 
 	  Esimple cord_ {
 		if(DEBUG) std::cout << " - Leído Ref 2...\n";
 		if(!esBase($4.tipo)){ msgError(ERR_EXP_ENT,nlin,ncol,"");}
@@ -905,10 +908,10 @@ void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
 		tipo_t tipo;
 		buscarTipo(obj_tipo.tipo_base,tipo);
 		var *= tipo.size;
-
 		while(!esBase(tipo.tipo_base)) {
 			var *= tipo.size;
 			buscarTipo(obj_tipo.tipo_base,tipo);
+			obj_tipo.tipo_base = tipo.tipo_base;
 		}
 			ptr_mem += var;
 	}

@@ -1,17 +1,21 @@
+
+
 import java.util.Scanner;
 
-public class p03 {
+public class p04 {
 
  public static void main(String[] args) {
-  int i,j;
-  int a,b,c;
-  double[][] p = new double [4][4];
-  Scanner sc = new Scanner(System.in);
+  int b;
+  int[][][][][][] a = new int[1][2][1][1][2][1];
   
-  i = 1;
-  j = 2;
-  System.out.println(i);
-  System.out.println(j);
-  }
+  b = 1-3+2*5/4;
+  a[0][1][0][0][1][0] = b;
+  a[0][0][0][0][0][0] = b+1;
+  a[0][1][0][0][0][0] = b+2;
+  a[0][0][0][0][1][0] = b+3;
+
+  System.out.println(b);  
+  System.out.println(a[0][1][0][0][1][0]+a[0][0][0][0][0][0]+a[0][1][0][0][0][0]+a[0][0][0][0][1][0]);
+ }
 }
 

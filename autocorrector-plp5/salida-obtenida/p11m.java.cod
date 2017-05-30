@@ -1,17 +1,14 @@
-3 dimsm
-3 dimensiones
+2 dimsm
+2 dimensiones
 ############ TABLA DE TIPOS ############
 Pos: 0	Tipo: 1	Tam: 1	T.Base: -1
 Pos: 1	Tipo: 2	Tam: 1	T.Base: -1
 Pos: 2	Tipo: 3	Tam: 1	T.Base: -1
 Pos: 3	Tipo: 4	Tam: 1	T.Base: -1
-Pos: 4	Tipo: 5	Tam: 2	T.Base: 2
-Pos: 5	Tipo: 6	Tam: 5	T.Base: 5
-Pos: 6	Tipo: 7	Tam: 10	T.Base: 6
+Pos: 4	Tipo: 5	Tam: 4	T.Base: 2
+Pos: 5	Tipo: 6	Tam: 10	T.Base: 5
 ########################################
 ############ TABLA DE SIMBOLOS ############
+Pos.: 0	Simbolo: f	Idx.Tipo: 2	Dir.: 0	Array? 0
 ###########################################
-Este es el tipo con el que voy a add simbolo a
-mov #7 A
-mov A 16014
-halt
+Este es el tipo con el que voy a add simbolo g
