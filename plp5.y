@@ -197,8 +197,6 @@ SecImp : SecImp punto_ id {
 Class : public_ class_ id llavei_ Main llaved_ {
 		//No hace nada?
 		if(DEBUG) std::cout << " - Leído Class...\n";
-		print_tabla_simbolos();
-		print_tabla_tipos();
 };
 
 Main : public_ static_ void_ main_ pari_ string_ cori_ cord_ id pard_ Bloque  {
@@ -236,7 +234,7 @@ Tipo : int_ {
 
 Bloque : llavei_ BDecl SeqInstr llaved_ {
 		if(DEBUG) std::cout << " - Leído Bloque...\n";
-	
+		cout << $3.cod << endl;
 };
 
 BDecl : BDecl DVar {
@@ -325,6 +323,7 @@ Variable : id {
 SeqInstr : SeqInstr Instr {
 		if(DEBUG) std::cout << " - Leído SeqInstr 1...\n";
 		$$.cod = $1.cod + $2.cod;
+		
 	}
 	| {
 		if(DEBUG) std::cout << " - Leído SeqInstr 2...\n";
@@ -350,35 +349,33 @@ Instr : pyc_ {
 		
 		$$.cod = $3.cod;
 		 if($1.tipo == REAL && $3.tipo == ENTERO){ //itor
-		 	$$.cod += "\nitor";
+		 	$$.cod += "itor";
 		 }
 
-		 $$.cod += "mov A " + IntToString($1.dBase);
+		 $$.cod += "mov A " + IntToString($1.dBase) + "\n";
 		 $$.dir = $3.dir;
-
-		 cout << $$.cod<<endl;
 		}
 	}
 	| system_ punto_ out_ punto_ println_ pari_ Expr pard_ pyc_ {
 		if(DEBUG) std::cout << " - Leído Instr 4...\n";	
 		$$.tipo = $7.tipo;
 		$$.dir = $7.dir;
-		$$.cod = $7.cod + "wrr A\n" + "wrl";
-
+		$$.cod =$7.cod + "wrr A \nwrl \n";
+		//$7.cod +
 	}
 	| system_ punto_ out_ punto_ print_ pari_ Expr pard_ pyc_ {
 		if(DEBUG) std::cout << " - Leído Instr 5...\n";	
 		$$.tipo = $7.tipo;
 		$$.dir = $7.dir;
-		$$.cod = $7.cod + "wrr A\n";
+		$$.cod =$7.cod +"wrr A \n";
 	}
 	| if_ pari_ Expr pard_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 6...\n";	
-		$$.cod = $3.cod + "\nmov " + IntToString($3.dir) + "A\njz " + IntToString($5.dir) + "\n" + $5.cod;
+		$$.cod = $3.cod + "mov " + IntToString($3.dir) + "A\njz " + IntToString($5.dir) + "\n" + $5.cod ;
 	}
 	| if_ pari_ Expr pard_ Instr else_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 7...\n";	
-		$$.cod = $3.cod + "\nmov " + IntToString($3.dir) + "A\njz " + IntToString($5.dir) + "\n" + $5.cod + "\njmp " + IntToString($7.dir) + $7.cod;
+		$$.cod = $3.cod + "mov " + IntToString($3.dir) + "A\njz " + IntToString($5.dir) + "\n" + $5.cod + "\njmp " + IntToString($7.dir) + $7.cod;
 	}
 	| while_ pari_ Expr pard_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 8...\n";	
@@ -667,7 +664,13 @@ Ref : id {
 			$$.dir = ptr_label;
 			$$.tipo = s.idTipo;
 			$$.dBase = s.dir;
-			$$.cod = "mov #0 " + ptr_label;
+			if(s.esArray){
+			
+				$$.cod = "mov #0 " + IntToString(ptr_label) + "\n";
+			}else{
+				$$.cod = "mov "+ IntToString(s.dir) + "A\n";
+
+			}
 		}
 	}
 	| Ref cori_ {if(esBase($1.tipo)) msgError(ERRFALTAN,nlin,ncol,"");} 
@@ -683,9 +686,9 @@ Ref : id {
 			buscarTipo($1.tipo, t);
 			$$.cod = $1.cod + $4.cod
 					 + "mov " + IntToString($1.dir) + " A\n" 
-					 + "muli #" + IntToString(t.size) 
-					 + "\naddi " + IntToString($4.dir) + "\n";
-					 + "mov A" + ptr_label;
+					 + "muli #" + IntToString(t.size) + "\n"
+					 + "addi " + IntToString($4.dir) + "\n";
+					 + "mov A" + IntToString(ptr_label) + "\n";
 		}
 	};
   

@@ -8,7 +8,10 @@ public class p03 {
   double[][] p = new double [4][4];
   Scanner sc = new Scanner(System.in);
   
-  a = 3;
+  i = 1;
+  j = 2;
+  System.out.println(i);
+  System.out.println(j);
   }
 }
 
