@@ -351,21 +351,15 @@ Instr : pyc_ {
 		$$.tipo = $1.tipo;
 	}
 	| Ref asig_ Expr pyc_ {
-
 		if(DEBUG) std::cout << " - Leído Instr 3...\n";	
-		if($1.tipo == ENTERO && $3.tipo == REAL){
-			msgError(ERR_TIPOSASIG,nlin,ncol,"");
-		}
-		if($1.tipo == SCANNER)
-			msgError(ERR_SCVAR, nlin,ncol,$1.lexema);
+		if($1.tipo == ENTERO && $3.tipo == REAL)	msgError(ERR_TIPOSASIG,nlin,ncol,"");
+		if($1.tipo == SCANNER)						msgError(ERR_SCVAR, nlin,ncol,$1.lexema);
 		else{
-		
 			$$.cod = $3.cod;
-			if($1.tipo == REAL && $3.tipo == ENTERO){ //itor
-		 		$$.cod += "itor\n";
-		 }
-		 $$.cod += "mov A " + IntToString($1.dBase) + "\n";
-		 $$.dir = $3.dir;
+			if($1.tipo == REAL && $3.tipo == ENTERO)
+				$$.cod += "itor\n";
+			$$.cod += "mov A " + IntToString($1.dir) + "\n";
+			$$.dir = $3.dir;
 		}
 	}
 	| system_ punto_ out_ punto_ println_ pari_ Expr pard_ pyc_ {
@@ -562,9 +556,10 @@ Term : Term mulop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR_NUM, 
 
 Factor : Ref {
 		if(DEBUG) std::cout << " - Leído Factor 1...\n";
-		$$.tipo = $1.tipo;
-		$$.dir 	= $1.dir;
-		$$.cod 	= $1.cod;
+		$$.tipo 	= $1.tipo;
+		$$.dir 		= $1.dir;
+		$$.cod 		= $1.cod;
+		$$.dBase 	= $1.dBase;
 	}
 	| id punto_ nextInt_ pari_ pard_ {
 		if(DEBUG) std::cout << " - Leído Factor 2...\n";
@@ -690,17 +685,15 @@ Ref : id {
 		if(!buscarSimbolo(s))
 			msgError(ERRNODECL,nlin,ncol, $1.lexema);
 		else{
-			ptr_label = NTemp();
-			$$.dir = ptr_label;
+			$$.dir = 	s.dir;
 			$$.tipo = s.idTipo;
-			$$.dBase = s.dir;
-			if(s.esArray){
-			
-				$$.cod = "mov #0 " + IntToString(ptr_label) + "\n";
-			}else{
-				$$.cod = "mov "+ IntToString(s.dir) + " A\n";
-
+			if(s.esArray) {
+				ptr_label 	= NTemp();
+				$$.dBase	= ptr_label;
+				$$.cod 		= "mov #0 " + IntToString(ptr_label) + "\n";
 			}
+			else
+				$$.cod = "mov "+ IntToString(s.dir) + " A\n";
 		}
 	}
 	| Ref cori_ {if(esBase($1.tipo)) msgError(ERRFALTAN,nlin,ncol,"");} 
@@ -905,7 +898,7 @@ void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
 			case BOOLEANO:	s.idTipo = BOOLEANO;break;
 			case SCANNER:	s.idTipo = SCANNER;	break;
 		}  
-		
+
 		ptr_mem += obj_tipo.size;
 	} else if (s.esArray) {
 		int var  = obj_tipo.size;
@@ -931,7 +924,7 @@ void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
 
 bool existeSimbolo(const char* simbolo) {
   		
-  if(DEBUG) std::cout << " - Existe simbolo ...\n " ;
+  if(DEBUG) std::cout << "Existe simbolo\n " ;
 
   std::vector<simbolo_t>::iterator begin_it = simbolos.begin();
   std::vector<simbolo_t>::iterator end_it   = simbolos.end();
