@@ -353,6 +353,8 @@ Instr : pyc_ {
 
 		 $$.cod += "\nmov " + IntToString($3.dir) + " " + IntToString($1.dir);
 		 $$.dir = $3.dir;
+
+		 cout << $$.cod<<endl;
 		}
 	}
 	| system_ punto_ out_ punto_ println_ pari_ Expr pard_ pyc_ {
@@ -650,22 +652,34 @@ Factor : Ref {
 
 Ref : id {
 		if(DEBUG) std::cout << " - Leído Ref 1...\n";
-													//
-		//simbolo_t s = buscarSimbolo($1.lexema);  	// REVISAR
-		$$.tipo = s.idTipo;							//
-		$$.dir = s.dir;
-		$$.dBase = buscarDir($1.lexema);
-		$$.cod = "mov #0 " + ptr_label;
+		simbolo_t s;
+		s.lexema = $1.lexema;
+		if(!buscarSimbolo(s))
+			msgError(ERRNODECL,nlin,ncol, $1.lexema);
+		else{
+			ptr_label = NTemp();
+			$$.dir = ptr_label;
+			$$.tipo = s.idTipo;
+			$$.dBase = s.dir;
+			//$$.cod = "mov #0 " + ptr_label;
+		}
 	}
-	| Ref cori_ {if(esBase($1.tipo)) msgError(1,1,1,"");} Esimple cord_ {
+	| Ref cori_ {if(esBase($1.tipo)) msgError(ERRFALTAN,nlin,ncol,"");} 
+	  Esimple cord_ {
 		if(DEBUG) std::cout << " - Leído Ref 2...\n";
-		if(!esBase($4.tipo)){ msgError(ERR_EXP_ENT,1,1,"");}
+		if(!esBase($4.tipo)){ msgError(ERR_EXP_ENT,nlin,ncol,"");}
 		else {
 			$$.tipo = tipoBase($1.tipo);
 			ptr_label = NTemp();
 			$$.dir = ptr_label;
 			$$.dBase = $1.dBase;
-			//$$.cod = $1.cod + $4.cod + "mov #" + tamTipo($1.tipo) + "\naddi " + $4.dir + "\nmov A " + tmp;
+			tipo_t t;
+			buscarTipo($1.tipo, t);
+			$$.cod = $1.cod + $4.cod
+					 + "mov " + IntToString($1.dir) + " A\n" 
+					 + "muli #" + IntToString(t.size) 
+					 + "\naddi " + IntToString($4.dir) + "\n";
+					 + "mov A" + ptr_label;
 		}
 	};
   
@@ -874,7 +888,7 @@ void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
 
 
       }else if (s.esArray){
-      	cout << "hola";
+
       	int var  = obj_tipo.size;
       	tipo_t tipo;
       	buscarTipo(obj_tipo.tipo_base,tipo);
@@ -927,9 +941,6 @@ bool buscarSimbolo(simbolo_t& simbolo) {    // simbolo debe llegar con el lexema
   return false;
 } 
 
-int getDir() {
-	return 1;
-}
 
 int NTemp(){
 	ptr_mem_temp ++;

@@ -3,7 +3,7 @@
 //Marcos Gonzalez Verdu;48772028e
 /* fichero con definciones comunes para los ficheros .l y .y */
 
-#define DEBUG 1		// si está a 0 no se muestra información de debugeo durante la ejecución
+#define DEBUG 0		// si está a 0 no se muestra información de debugeo durante la ejecución
 
 typedef struct {
 	char 		*lexema;
