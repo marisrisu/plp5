@@ -246,7 +246,6 @@ BDecl : BDecl DVar {
 }
 	   | {
 		if(DEBUG) std::cout << " - Leído BDecl 2...\n";
-	  
 	  };
 
 DVar : Tipo {$$.tipo = $1.tipo;} LIdent pyc_ {
@@ -335,6 +334,7 @@ SeqInstr : SeqInstr Instr {
 		
 	}
 	| {
+		$$.cod = "";
 		if(DEBUG) std::cout << " - Leído SeqInstr 2...\n";
 	};
 
@@ -382,14 +382,15 @@ Instr : pyc_ {
 	| if_ pari_ Expr pard_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 6...\n";	
 		$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod;
+		
 	}
 	| if_ pari_ Expr pard_ Instr else_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 7...\n";	
-		$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod + "jmp " + IntToString($7.dir) + $7.cod;
+		$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod + "jmp " + IntToString($7.dir) +"\n" + $7.cod;
 	}
 	| while_ pari_ Expr pard_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 8...\n";	
-		$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod + "jmp " + IntToString($3.dir);
+		$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod + "jmp " + IntToString($3.dir) +"\n";
 };
 
 Expr : Expr or_ { if($1.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.lexema); } EConj {
@@ -436,7 +437,8 @@ ERel : Esimple relop_ { if($1.tipo != ENTERO && $1.tipo != REAL && $1.tipo != BO
 				$$.cod = $4.cod
 						+ "mov A " + IntToString(ptr_label) + "\n"
 						+ "mov " + IntToString($1.dir) + " A\n"
-						+ relopToM2R($2.lexema, REAL) + IntToString(ptr_label) + "\n";
+						//+ relopToM2R($2.lexema, REAL) + IntToString(ptr_label) + "\n";
+						+ relopToM2R($2.lexema, REAL) +  IntToString($1.dir) + "\n";
 			} else {
 				$$.cod = $4.cod
 						+ "mov A " + IntToString(ptr_label) + "\n"
@@ -626,7 +628,7 @@ Factor : Ref {
 		$$.tipo = $2.tipo;
 		$$.cod 	= $2.cod + "noti\n";
 	}
-	| pari_ Tipo { if(!esBase($2.tipo)) msgError(ERR_TIPOS,nlin,ncol,$2.lexema); } pard_ Expr {
+	| pari_ Tipo { if(!esBase($2.tipo)) msgError(ERR_TIPOS,nlin,ncol,$2.lexema); } pard_ Factor {
 		if(DEBUG) std::cout << " - Leído Factor 10...\n";
 
 		if(!esBase($5.tipo)) msgError(ERR_TIPOS,nlin,ncol,$5.lexema);
@@ -876,46 +878,47 @@ void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
 						"\tArray? " << esArray << "\n";
 
 	if(!existeSimbolo(lexema)) {  // Si no existe
-	simbolo_t s;
-	tipo_t obj_tipo;
-	buscarTipo(idTipo, obj_tipo);
+		simbolo_t s;
+		tipo_t obj_tipo;
+		buscarTipo(idTipo, obj_tipo);
 
-	s.lexema    = std::string(lexema);
-	s.lin       = lin;
-	s.col       = col;
-	s.dir       = ptr_mem;
-	s.idTipo    = idTipo;
-	s.esArray   = esArray;
+		s.lexema    = std::string(lexema);
+		s.lin       = lin;
+		s.col       = col;
+		s.dir       = ptr_mem;
+		s.idTipo    = idTipo;
+		s.esArray   = esArray;
 
-	if(!s.esArray) {
-		switch(idTipo) {
-			case ENTERO: 	s.idTipo = ENTERO;	break;
-			case REAL:		s.idTipo = REAL;	break;
-			case BOOLEANO:	s.idTipo = BOOLEANO;break;
-			case SCANNER:	s.idTipo = SCANNER;	break;
-		}  
+		if(!s.esArray) {
+			switch(idTipo) {
+				case ENTERO: 	s.idTipo = ENTERO;	break;
+				case REAL:		s.idTipo = REAL;	break;
+				case BOOLEANO:	s.idTipo = BOOLEANO;break;
+				case SCANNER:	s.idTipo = SCANNER;	break;
+			}  
 
-		ptr_mem += obj_tipo.size;
-	} else if (s.esArray) {
-		int var  = obj_tipo.size;
-		tipo_t tipo;
-		buscarTipo(obj_tipo.tipo_base,tipo);
-		var *= tipo.size;
-		while(!esBase(tipo.tipo_base)) {
-			var *= tipo.size;
+			ptr_mem += obj_tipo.size;
+		} else if (s.esArray) {
+			int var  = obj_tipo.size;
+			tipo_t tipo;
 			buscarTipo(obj_tipo.tipo_base,tipo);
-			obj_tipo.tipo_base = tipo.tipo_base;
+			var *= tipo.size;
+			while(!esBase(tipo.tipo_base)) {
+				var *= tipo.size;
+				buscarTipo(obj_tipo.tipo_base,tipo);
+				obj_tipo.tipo_base = tipo.tipo_base;
+			}
+				ptr_mem += var;
 		}
-			ptr_mem += var;
-	}
 
-	if(ptr_mem > MAX_MEM)   // Si no cabe en memoria..
-		msgError(ERR_NOCABE, lin, col, lexema);    // error, memoria llena  
+		if(ptr_mem > MAX_MEM)   // Si no cabe en memoria..
+			msgError(ERR_NOCABE, lin, col, lexema);    // error, memoria llena  
 
-		simbolos.push_back(s);
-	}
-	else
+			ambito->simbolos.push_back(s);
+		}
+	else{
 		msgError(ERRYADECL, lin, col, lexema);   // Error, simbolo ya declarado
+	}
 }
 
 
@@ -932,8 +935,8 @@ bool existeSimbolo(const char* simbolo) {
 }
 bool buscarSimbolo(simbolo_t& simbolo) {    // simbolo debe llegar con el lexema y volvera con todos los atributos
   
-  std::vector<simbolo_t>::iterator begin_it = simbolos.begin();
-  std::vector<simbolo_t>::iterator end_it   = simbolos.end();
+  std::vector<simbolo_t>::iterator begin_it = ambito->simbolos.begin();
+  std::vector<simbolo_t>::iterator end_it   = ambito->simbolos.end();
   std::vector<simbolo_t>::iterator it       = std::find_if(begin_it,end_it, find_simbolo(simbolo.lexema)); 
 
   if(it != end_it)
@@ -1029,10 +1032,12 @@ void print_tabla_tipos() {
 }
 
 void print_tabla_simbolos() {
-  std::cout << "############ TABLA DE SIMBOLOS ############\n";
+
+
+  std::cout << "############ TABLA DE SIMBOLOS ############ " << ambito->nombre<<endl;
   std::vector<simbolo_t>::iterator it_simbolos;
   int pos = 0;
-  for(it_simbolos = simbolos.begin(); it_simbolos != simbolos.end(); ++it_simbolos)
+  for(it_simbolos = ambito->simbolos.begin(); it_simbolos != ambito->simbolos.end(); ++it_simbolos)
   {
     cout << "Pos.: " << pos << 
     "\tSimbolo: " << it_simbolos->lexema << 
