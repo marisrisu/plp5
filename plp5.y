@@ -382,9 +382,14 @@ Instr : pyc_ {
 		$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod + "\njmp " + IntToString($3.dir);
 };
 
-Expr : Expr or_ EConj {
+Expr : Expr or_ { if($1.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.lexema); } EConj {
 		if(DEBUG) std::cout << " - Leído Expr 1...\n";	
-
+		if($4.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.lexema);
+		ptr_label = NTemp();
+		$$.dir 	= ptr_label;
+		$$.cod = $1.cod
+					+ "ori " + IntToString($4.dir) + "\n"
+					+ "mov A " + IntToString(ptr_label) + "\n";
 	}
 	| EConj {
 		if(DEBUG) std::cout << " - Leído Expr 2...\n";
@@ -393,16 +398,21 @@ Expr : Expr or_ EConj {
 		$$.cod 	= $1.cod;
 	};
 
-EConj : EConj and_ ERel {
+EConj : EConj and_ { if($1.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.lexema); } ERel {
 		if(DEBUG) std::cout << " - Leído EConj 1...\n";
-	
-}
-	  | ERel {
+		if($4.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.lexema);
+		ptr_label = NTemp();
+		$$.dir 	= ptr_label;
+		$$.cod = $1.cod
+					+ "andi " + IntToString($4.dir) + "\n"
+					+ "mov A " + IntToString(ptr_label) + "\n";
+	}
+	| ERel {
 		if(DEBUG) std::cout << " - Leído EConj 2...\n";
 		$$.tipo = $1.tipo;
 		$$.dir 	= $1.dir;
 		$$.cod 	= $1.cod;
-	  };
+	};
 
 ERel : Esimple relop_ { if($1.tipo != ENTERO && $1.tipo != REAL && $1.tipo != BOOLEANO) msgError(ERR_NUM, nlin, ncol, $2.lexema); } Esimple {
 		if(DEBUG) std::cout << " - Leído ERel 1...\n";
@@ -461,11 +471,11 @@ Esimple : Esimple addop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR
 
 			if($1.tipo == ENTERO) {
 				$$.cod = $1.cod
-							+ "addi " + IntToString($4.dir) + "\n"
+							+ addopToM2R($2.lexema, ENTERO) + IntToString($4.dir) + "\n"
 							+ "mov A " + IntToString(ptr_label) + "\n";
 			} else {
 				$$.cod = $1.cod
-							+ "addr " + IntToString($4.dir) + "\n"
+							+ addopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
 							+ "mov A " + IntToString(ptr_label) + "\n";
 			}
 		} else {
@@ -474,12 +484,12 @@ Esimple : Esimple addop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR
 			if($1.tipo == ENTERO) {
 				$$.cod = $1.cod
 							+ "itor\n"
-							+ "addr " + IntToString($4.dir) + "\n"
+							+ addopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
 							+ "mov A " + IntToString(ptr_label) + "\n";
 			} else {
 				$$.cod = $4.cod
 							+ "itor\n"
-							+ "addr " + IntToString($1.dir) + "\n"
+							+ addopToM2R($2.lexema, REAL) + IntToString($1.dir) + "\n"
 							+ "mov A " + IntToString(ptr_label) + "\n";
 			}
 		}
@@ -502,11 +512,11 @@ Term : Term mulop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR_NUM, 
 
 			if($1.tipo == ENTERO) {
 				$$.cod = $1.cod
-							+ "muli " + IntToString($4.dir) + "\n"
+							+ mulopToM2R($2.lexema, ENTERO) + IntToString($4.dir) + "\n"
 							+ "mov A " + IntToString(ptr_label) + "\n";
 			} else {
 				$$.cod = $1.cod
-							+ "mulr " + IntToString($4.dir) + "\n"
+							+ mulopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
 							+ "mov A " + IntToString(ptr_label) + "\n";
 			}
 		} else {
@@ -515,12 +525,12 @@ Term : Term mulop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR_NUM, 
 			if($1.tipo == ENTERO) {
 				$$.cod = $1.cod
 							+ "itor\n"
-							+ "mulr " + IntToString($4.dir) + "\n"
+							+ mulopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
 							+ "mov A " + IntToString(ptr_label) + "\n";
 			} else {
 				$$.cod = $4.cod
 							+ "itor\n"
-							+ "mulr " + IntToString($1.dir) + "\n"
+							+ mulopToM2R($2.lexema, REAL) + IntToString($1.dir) + "\n"
 							+ "mov A " + IntToString(ptr_label) + "\n";
 			}
 		}
@@ -598,6 +608,7 @@ Factor : Ref {
 	}
 	| not_ Factor {
 		if(DEBUG) std::cout << " - Leído Factor 9...\n";
+		if($2.tipo == BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $1.lexema);
 		ptr_label = NTemp();
 		$$.tipo = $2.tipo;
 		$$.dir 	= ptr_label;
@@ -623,31 +634,31 @@ Factor : Ref {
 				if($2.tipo == ENTERO) {
 					$$.cod 	= $5.cod
 								+ "ori #0\n"
-								+ "mov A" + IntToString(ptr_label) + "\n";
+								+ "mov A " + IntToString(ptr_label) + "\n";
 				} else {
 					$$.cod 	= $5.cod
 								+ "orr #0\n"
-								+ "mov A" + IntToString(ptr_label) + "\n";
+								+ "mov A " + IntToString(ptr_label) + "\n";
 				}
 			} else if($5.tipo == ENTERO) {
 				if($2.tipo == BOOLEANO) {
 						$$.cod 	= $5.cod
 									+ "andi #1\n"
-									+ "mov A" + IntToString(ptr_label) + "\n";
+									+ "mov A " + IntToString(ptr_label) + "\n";
 				} else {
 					$$.cod 	= $5.cod
 								+ "itor\n"
-								+ "mov A" + IntToString(ptr_label) + "\n";
+								+ "mov A " + IntToString(ptr_label) + "\n";
 				}
 			} else {
 				if($2.tipo == BOOLEANO) {
 						$$.cod 	= $5.cod
 									+ "andr #1\n"
-									+ "mov A" + IntToString(ptr_label) + "\n";
+									+ "mov A " + IntToString(ptr_label) + "\n";
 				} else {
 					$$.cod 	= $5.cod
 								+ "rtoi\n"
-								+ "mov A" + IntToString(ptr_label) + "\n";
+								+ "mov A " + IntToString(ptr_label) + "\n";
 				}
 			}
 		}
@@ -668,7 +679,7 @@ Ref : id {
 			
 				$$.cod = "mov #0 " + IntToString(ptr_label) + "\n";
 			}else{
-				$$.cod = "mov "+ IntToString(s.dir) + "A\n";
+				$$.cod = "mov "+ IntToString(s.dir) + " A\n";
 
 			}
 		}
@@ -688,7 +699,7 @@ Ref : id {
 					 + "mov " + IntToString($1.dir) + " A\n" 
 					 + "muli #" + IntToString(t.size) + "\n"
 					 + "addi " + IntToString($4.dir) + "\n";
-					 + "mov A" + IntToString(ptr_label) + "\n";
+					 + "mov A " + IntToString(ptr_label) + "\n";
 		}
 	};
   
