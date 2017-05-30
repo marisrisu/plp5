@@ -1,0 +1,31 @@
+mov #7.5 A
+mov A 0
+mov 0 A
+rtoi
+mov A 16016
+mov A 2
+mov 2 A
+gtrr 16018
+mov A 16019
+mov 16019 A
+jz 0
+mov 2 A
+addi 16032
+mov A 16033
+mov A 3
+mov 3 A
+divi 16036
+mov A 16037
+divi 16038
+mov A 16039
+mov A 4
+mov 4 A
+wri A 
+wrl
+mov 0 A
+wrr A 
+wrl
+mov 2 A
+wri A 
+wrl
+halt

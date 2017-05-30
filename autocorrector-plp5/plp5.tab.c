@@ -2587,11 +2587,11 @@ std::string relopToM2R(const char *relop, int tipo) {
 		case REAL:		t = 'r';	break;
 	}
 
-	if(!strcmp(relop, "=="))		return std::string("eql") + t + " "; 
+	if(!strcmp(relop, "=="))			return std::string("eql") + t + " "; 
 	else if(!strcmp(relop, "!="))	return std::string("neq") + t + " "; 
-	else if(!strcmp(relop, "<"))	return std::string("lss") + t + " "; 
+	else if(!strcmp(relop, "<"))		return std::string("lss") + t + " "; 
 	else if(!strcmp(relop, "<="))	return std::string("leq") + t + " "; 
-	else if(!strcmp(relop, ">"))	return std::string("gtr") + t + " "; 
+	else if(!strcmp(relop, ">"))		return std::string("gtr") + t + " "; 
 	else if(!strcmp(relop, ">="))	return std::string("geq") + t + " ";
 
 	return "";
@@ -2724,51 +2724,63 @@ int buscarDir(const char* lexema){
 
 void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
 	if(DEBUG) std::cout << "*NUEVO SIMBOLO* Simbolo: " << lexema << 
-						"\tIdx.Tipo: " << idTipo << 
-						"\tDir.: " << ptr_mem <<
-						"\tArray? " << esArray << "\n";
+    "\tIdx.Tipo: " << idTipo << 
+    "\tDir.: " << ptr_mem <<
+    "\tArray? " << esArray << "\n";
 
-	if(!existeSimbolo(lexema)) {  // Si no existe
-	simbolo_t s;
-	tipo_t obj_tipo;
-	buscarTipo(idTipo, obj_tipo);
+  if(!existeSimbolo(lexema))  // Si no existe
+  {
+    simbolo_t s;
+    tipo_t obj_tipo;
+    buscarTipo(idTipo, obj_tipo);
 
-	s.lexema    = std::string(lexema);
-	s.lin       = lin;
-	s.col       = col;
-	s.dir       = ptr_mem;
-	s.idTipo    = idTipo;
-	s.esArray   = esArray;
+    s.lexema    = std::string(lexema);
+    s.lin       = lin;
+    s.col       = col;
+    s.dir       = ptr_mem;
+    s.idTipo    = idTipo;
+    s.esArray   = esArray;
+   
+      if(!s.esArray) {
+        switch(idTipo) {
+          case ENTERO: 
+            s.idTipo = ENTERO;
+            break;
+          case REAL:
+            s.idTipo =REAL;
+            break;
+          case BOOLEANO:
+            s.idTipo = BOOLEANO;
+            break;
+          case SCANNER:
+            s.idTipo = SCANNER;
+            break;
+        }  
 
-	if(!s.esArray) {
-		switch(idTipo) {
-			case ENTERO: 	s.idTipo = ENTERO;	break;
-			case REAL:		s.idTipo = REAL;	break;
-			case BOOLEANO:	s.idTipo = BOOLEANO;break;
-			case SCANNER:	s.idTipo = SCANNER;	break;
-		}  
-		
-		ptr_mem += obj_tipo.size;
-	} else if (s.esArray) {
-		int var  = obj_tipo.size;
-		tipo_t tipo;
-		buscarTipo(obj_tipo.tipo_base,tipo);
-		var *= tipo.size;
+        ptr_mem += obj_tipo.size;
 
-		while(!esBase(tipo.tipo_base)) {
-			var *= tipo.size;
-			buscarTipo(obj_tipo.tipo_base,tipo);
-		}
-			ptr_mem += var;
-	}
 
-	if(ptr_mem > MAX_MEM)   // Si no cabe en memoria..
-		msgError(ERR_NOCABE, lin, col, lexema);    // error, memoria llena  
+      }else if (s.esArray){
 
-		simbolos.push_back(s);
-	}
-	else
-		msgError(ERRYADECL, lin, col, lexema);   // Error, simbolo ya declarado
+      	int var  = obj_tipo.size;
+      	tipo_t tipo;
+      	buscarTipo(obj_tipo.tipo_base,tipo);
+      	var *= tipo.size;
+      	while(!esBase(tipo.tipo_base)){
+      		
+      		var *= tipo.size;
+      		buscarTipo(obj_tipo.tipo_base,tipo);
+      		  }
+
+      	ptr_mem += var;
+      }
+    if(ptr_mem > MAX_MEM)   // Si no cabe en memoria..
+      msgError(ERR_NOCABE, lin, col, lexema);    // error, memoria llena  
+
+    simbolos.push_back(s);
+  }
+  else
+    msgError(ERRYADECL, lin, col, lexema);   // Error, simbolo ya declarado
 }
 
 bool existeSimbolo(const char* simbolo) {
