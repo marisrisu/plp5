@@ -336,7 +336,9 @@ Instr : pyc_ {
 	}
 	| Bloque {
 		if(DEBUG) std::cout << " - Leído Instr 2...\n";	
-
+		$$.dir = $1.dir;
+		$$.cod = $1.cod;
+		$$.tipo = $1.tipo;
 	}
 	| Ref asig_ Expr pyc_ {
 
@@ -351,7 +353,7 @@ Instr : pyc_ {
 		 	$$.cod += "\nitor";
 		 }
 
-		 $$.cod += "\nmov " + IntToString($3.dir) + " " + IntToString($1.dir);
+		 $$.cod += "mov A " + IntToString($1.dBase);
 		 $$.dir = $3.dir;
 
 		 cout << $$.cod<<endl;
@@ -359,12 +361,16 @@ Instr : pyc_ {
 	}
 	| system_ punto_ out_ punto_ println_ pari_ Expr pard_ pyc_ {
 		if(DEBUG) std::cout << " - Leído Instr 4...\n";	
-
+		$$.tipo = $7.tipo;
+		$$.dir = $7.dir;
+		$$.cod = $7.cod + "wrr A\n" + "wrl";
 
 	}
 	| system_ punto_ out_ punto_ print_ pari_ Expr pard_ pyc_ {
 		if(DEBUG) std::cout << " - Leído Instr 5...\n";	
-
+		$$.tipo = $7.tipo;
+		$$.dir = $7.dir;
+		$$.cod = $7.cod + "wrr A\n";
 	}
 	| if_ pari_ Expr pard_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 6...\n";	
@@ -661,7 +667,7 @@ Ref : id {
 			$$.dir = ptr_label;
 			$$.tipo = s.idTipo;
 			$$.dBase = s.dir;
-			//$$.cod = "mov #0 " + ptr_label;
+			$$.cod = "mov #0 " + ptr_label;
 		}
 	}
 	| Ref cori_ {if(esBase($1.tipo)) msgError(ERRFALTAN,nlin,ncol,"");} 
