@@ -260,13 +260,10 @@ DVar : Tipo {$$.tipo = $1.tipo;} LIdent pyc_ {
 		if(DEBUG) std::cout << " - Leído DVar 2...\n";
 		cout << $2.dir << " dimsm"<<endl;
 		cout << $8.dBase << " dimensiones"<<endl;
-		print_tabla_tipos();
-		print_tabla_simbolos();
 		if($2.dir != $8.dBase) msgError(ERR_DIMSDECLARRAY,nlin,ncol, $3.lexema);
 		ptr_label = NTemp();
 		$$.dir = ptr_label;
 		$$.tipo = $1.tipo;
-		cout << "Este es el tipo con el que voy a add simbolo "<<$3.lexema <<endl; 
 		nuevoSimbolo($3.lexema, true, $8.tipo, nlin, ncol-strlen(yytext));
 
 
@@ -403,8 +400,7 @@ Expr : Expr or_ { if($1.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.
 		ptr_label = NTemp();
 		$$.dir 	= ptr_label;
 		$$.cod = $1.cod
-					+ "ori " + IntToString($4.dir) + "\n"
-					+ "mov A " + IntToString(ptr_label) + "\n";
+					+ "ori " + IntToString($4.dir) + "\n";
 	}
 	| EConj {
 		if(DEBUG) std::cout << " - Leído Expr 2...\n";
@@ -416,11 +412,8 @@ Expr : Expr or_ { if($1.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.
 EConj : EConj and_ { if($1.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.lexema); } ERel {
 		if(DEBUG) std::cout << " - Leído EConj 1...\n";
 		if($4.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.lexema);
-		ptr_label = NTemp();
-		$$.dir 	= ptr_label;
 		$$.cod = $1.cod
-					+ "andi " + IntToString($4.dir) + "\n"
-					+ "mov A " + IntToString(ptr_label) + "\n";
+					+ "andi " + IntToString($4.dir) + "\n";
 	}
 	| ERel {
 		if(DEBUG) std::cout << " - Leído EConj 2...\n";
@@ -432,24 +425,16 @@ EConj : EConj and_ { if($1.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, 
 ERel : Esimple relop_ { if($1.tipo != ENTERO && $1.tipo != REAL && $1.tipo != BOOLEANO) msgError(ERR_NUM, nlin, ncol, $2.lexema); } Esimple {
 		if(DEBUG) std::cout << " - Leído ERel 1...\n";
 		if($4.tipo != ENTERO && $4.tipo != REAL && $1.tipo != BOOLEANO) msgError(ERR_NUM, nlin, ncol, $2.lexema);
-		ptr_label = NTemp();
-		$$.dir 	= ptr_label;
 
 		if($1.tipo = $4.tipo) {
 			$$.tipo = $4.tipo;
 
 			if($1.tipo == ENTERO) {
-				$$.cod = $1.cod
-							+ relopToM2R($2.lexema, ENTERO) + IntToString($4.dir) + "\n"
-							+ "mov A " + IntToString(ptr_label) + "\n";
+				$$.cod = $1.cod + relopToM2R($2.lexema, ENTERO) + IntToString($4.dir) + "\n";
 			} else if($1.tipo == REAL) {
-				$$.cod = $1.cod
-							+ relopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
-							+ "mov A " + IntToString(ptr_label) + "\n";
+				$$.cod = $1.cod + relopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n";
 			} else {
-				$$.cod = $1.cod
-							+ relopToM2R($2.lexema, BOOLEANO) + IntToString($4.dir) + "\n"
-							+ "mov A " + IntToString(ptr_label) + "\n";
+				$$.cod = $1.cod + relopToM2R($2.lexema, BOOLEANO) + IntToString($4.dir) + "\n";
 			}
 		} else if($1.tipo != BOOLEANO && $4.tipo != BOOLEANO) {
 			$$.tipo = REAL;
@@ -457,13 +442,11 @@ ERel : Esimple relop_ { if($1.tipo != ENTERO && $1.tipo != REAL && $1.tipo != BO
 			if($1.tipo == ENTERO) {
 				$$.cod = $1.cod
 							+ "itor\n"
-							+ relopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
-							+ "mov A " + IntToString(ptr_label) + "\n";
+							+ relopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n";
 			} else {
 				$$.cod = $4.cod
 							+ "itor\n"
-							+ relopToM2R($2.lexema, REAL) + IntToString($1.dir) + "\n"
-							+ "mov A " + IntToString(ptr_label) + "\n";
+							+ relopToM2R($2.lexema, REAL) + IntToString($1.dir) + "\n";
 			}
 		} else 
 			msgError(ERR_TIPOS, nlin, ncol, $2.lexema);
@@ -478,20 +461,14 @@ ERel : Esimple relop_ { if($1.tipo != ENTERO && $1.tipo != REAL && $1.tipo != BO
 Esimple : Esimple addop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR_NUM, nlin, ncol, $2.lexema); } Term {
 		if(DEBUG) std::cout << " - Leído Esimple 1...\n";
 		if($4.tipo != ENTERO && $4.tipo != REAL) msgError(ERR_NUM, nlin, ncol, $2.lexema);
-		ptr_label = NTemp();
-		$$.dir 	= ptr_label;
 
 		if($1.tipo = $4.tipo) {
 			$$.tipo = $4.tipo;
 
 			if($1.tipo == ENTERO) {
-				$$.cod = $1.cod
-							+ addopToM2R($2.lexema, ENTERO) + IntToString($4.dir) + "\n"
-							+ "mov A " + IntToString(ptr_label) + "\n";
+				$$.cod = $1.cod + addopToM2R($2.lexema, ENTERO) + IntToString($4.dir) + "\n";
 			} else {
-				$$.cod = $1.cod
-							+ addopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
-							+ "mov A " + IntToString(ptr_label) + "\n";
+				$$.cod = $1.cod + addopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n";
 			}
 		} else {
 			$$.tipo = REAL;
@@ -499,13 +476,11 @@ Esimple : Esimple addop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR
 			if($1.tipo == ENTERO) {
 				$$.cod = $1.cod
 							+ "itor\n"
-							+ addopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
-							+ "mov A " + IntToString(ptr_label) + "\n";
+							+ addopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n";
 			} else {
 				$$.cod = $4.cod
 							+ "itor\n"
-							+ addopToM2R($2.lexema, REAL) + IntToString($1.dir) + "\n"
-							+ "mov A " + IntToString(ptr_label) + "\n";
+							+ addopToM2R($2.lexema, REAL) + IntToString($1.dir) + "\n";
 			}
 		}
 	}
@@ -519,20 +494,13 @@ Esimple : Esimple addop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR
 Term : Term mulop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR_NUM, nlin, ncol, $2.lexema); } Factor {
 		if(DEBUG) std::cout << " - Leído Term 1...\n";
 		if($4.tipo != ENTERO && $4.tipo != REAL) msgError(ERR_NUM, nlin, ncol, $2.lexema);
-		ptr_label = NTemp();
-		$$.dir 	= ptr_label;
-
 		if($1.tipo = $4.tipo) {
 			$$.tipo = $4.tipo;
 
 			if($1.tipo == ENTERO) {
-				$$.cod = $1.cod
-							+ mulopToM2R($2.lexema, ENTERO) + IntToString($4.dir) + "\n"
-							+ "mov A " + IntToString(ptr_label) + "\n";
+				$$.cod = $1.cod + mulopToM2R($2.lexema, ENTERO) + IntToString($4.dir) + "\n";
 			} else {
-				$$.cod = $1.cod
-							+ mulopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
-							+ "mov A " + IntToString(ptr_label) + "\n";
+				$$.cod = $1.cod + mulopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n";
 			}
 		} else {
 			$$.tipo = REAL;
@@ -540,13 +508,11 @@ Term : Term mulop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR_NUM, 
 			if($1.tipo == ENTERO) {
 				$$.cod = $1.cod
 							+ "itor\n"
-							+ mulopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
-							+ "mov A " + IntToString(ptr_label) + "\n";
+							+ mulopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n";
 			} else {
 				$$.cod = $4.cod
 							+ "itor\n"
-							+ mulopToM2R($2.lexema, REAL) + IntToString($1.dir) + "\n"
-							+ "mov A " + IntToString(ptr_label) + "\n";
+							+ mulopToM2R($2.lexema, REAL) + IntToString($1.dir) + "\n";
 			}
 		}
 	}
@@ -600,21 +566,21 @@ Factor : Ref {
 		ptr_label = NTemp();
 		$$.tipo = REAL;
 		$$.dir 	= ptr_label;
-		$$.cod 	= std::string("mov #") + $1.lexema + " A\n";
+		$$.cod 	= std::string("mov $") + $1.lexema + " A\n";
 	}
 	| true_ {
 		if(DEBUG) std::cout << " - Leído Factor 6...\n";
 		ptr_label = NTemp();
 		$$.tipo = BOOLEANO;
 		$$.dir 	= ptr_label;
-		$$.cod 	= "mov #0 A\n";
+		$$.cod 	= "mov #1 A\n";
 	}
 	| false_ {
 		if(DEBUG) std::cout << " - Leído Factor 7...\n";
 		ptr_label = NTemp();
 		$$.tipo = BOOLEANO;
 		$$.dir 	= ptr_label;
-		$$.cod 	= "mov #1 A\n";
+		$$.cod 	= "mov #0 A\n";
 	}
 	| pari_ Expr pard_ {
 		if(DEBUG) std::cout << " - Leído Factor 8...\n";
@@ -624,13 +590,9 @@ Factor : Ref {
 	}
 	| not_ Factor {
 		if(DEBUG) std::cout << " - Leído Factor 9...\n";
-		if($2.tipo == BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $1.lexema);
-		ptr_label = NTemp();
+		if($2.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $1.lexema);
 		$$.tipo = $2.tipo;
-		$$.dir 	= ptr_label;
-		$$.cod 	= $2.cod
-					+ "noti\n"
-					+ "mov A " + IntToString(ptr_label) + "\n";
+		$$.cod 	= $2.cod + "noti\n";
 	}
 	| pari_ Tipo { if(!esBase($2.tipo)) msgError(ERR_TIPOS,nlin,ncol,$2.lexema); } pard_ Expr {
 		if(DEBUG) std::cout << " - Leído Factor 10...\n";
@@ -699,7 +661,7 @@ Ref : id {
 				$$.cod = "mov "+ IntToString(s.dir) + " A\n";
 		}
 	}
-	| Ref cori_ {if($1.esArray) msgError(ERRFALTAN,nlin,ncol,"");} 
+	| Ref cori_ {if(esBase($1.tipo)) msgError(ERRFALTAN,nlin,ncol,"");} 
 	  Esimple cord_ {
 		if(DEBUG) std::cout << " - Leído Ref 2...\n";
 		if(!esBase($4.tipo)){ msgError(ERR_EXP_ENT,nlin,ncol,"");}
@@ -924,6 +886,55 @@ void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
 	else
 		msgError(ERRYADECL, lin, col, lexema);   // Error, simbolo ya declarado
 }
+
+//void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
+//	if(DEBUG) std::cout << "*NUEVO SIMBOLO* Simbolo: " << lexema << 
+//						"\tIdx.Tipo: " << idTipo << 
+//						"\tDir.: " << ptr_mem <<
+//						"\tArray? " << esArray << "\n";
+//
+//	if(!existeSimbolo(lexema)) {  // Si no existe
+//	simbolo_t s;
+//	tipo_t obj_tipo;
+//	buscarTipo(idTipo, obj_tipo);
+//
+//	s.lexema    = std::string(lexema);
+//	s.lin       = lin;
+//	s.col       = col;
+//	s.dir       = ptr_mem;
+//	s.idTipo    = idTipo;
+//	s.esArray   = esArray;
+//
+//	if(!s.esArray) {
+//		switch(idTipo) {
+//			case ENTERO: 	s.idTipo = ENTERO;	break;
+//			case REAL:		s.idTipo = REAL;	break;
+//			case BOOLEANO:	s.idTipo = BOOLEANO;break;
+//			case SCANNER:	s.idTipo = SCANNER;	break;
+//		}  
+//
+//		ptr_mem += obj_tipo.size;
+//	} else if (s.esArray) {
+//		int var  = obj_tipo.size;
+//		tipo_t tipo;
+//		buscarTipo(obj_tipo.tipo_base,tipo);
+//		var *= tipo.size;
+//
+//		while(!esBase(tipo.tipo_base)) {
+//			var *= tipo.size;
+//			buscarTipo(obj_tipo.tipo_base,tipo);
+//		}
+//			ptr_mem += var;
+//	}
+//
+//	if(ptr_mem > MAX_MEM)   // Si no cabe en memoria..
+//		msgError(ERR_NOCABE, lin, col, lexema);    // error, memoria llena  
+//
+//		simbolos.push_back(s);
+//	}
+//	else
+//		msgError(ERRYADECL, lin, col, lexema);   // Error, simbolo ya declarado
+//}
 
 bool existeSimbolo(const char* simbolo) {
   		
