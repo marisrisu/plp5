@@ -428,36 +428,41 @@ ERel : Esimple relop_ { if($1.tipo != ENTERO && $1.tipo != REAL && $1.tipo != BO
 		$$.tipo = BOOLEANO;
 		ptr_label = NTemp();
 
-		if($1.tipo = $4.tipo) {
+		if($1.tipo == $4.tipo) {
 			if($1.tipo == ENTERO) {
 				$$.cod = $4.cod
 						+ "mov A " + IntToString(ptr_label) + "\n"
-						+ "mov " + IntToString($1.dir) + " A\n"
+						//+ "mov " + IntToString($1.dir) + " A\n"
+						+ $1.cod
 						+ relopToM2R($2.lexema, ENTERO) + IntToString(ptr_label) + "\n";
 			} else if($1.tipo == REAL) {
 				$$.cod = $4.cod
 						+ "mov A " + IntToString(ptr_label) + "\n"
-						+ "mov " + IntToString($1.dir) + " A\n"
-						//+ relopToM2R($2.lexema, REAL) + IntToString(ptr_label) + "\n";
-						+ relopToM2R($2.lexema, REAL) +  IntToString($1.dir) + "\n";
+						//+ "mov " + IntToString($1.dir) + " A\n"
+						+ $1.cod
+						+ relopToM2R($2.lexema, REAL) + IntToString(ptr_label) + "\n";
+						//+ relopToM2R($2.lexema, REAL) +  IntToString($1.dir) + "\n";
 			} else {
 				$$.cod = $4.cod
 						+ "mov A " + IntToString(ptr_label) + "\n"
-						+ "mov " + IntToString($1.dir) + " A\n"
+						//+ "mov " + IntToString($1.dir) + " A\n"
+						+ $1.cod
 						+ relopToM2R($2.lexema, BOOLEANO) + IntToString(ptr_label) + "\n";
 			}
 		} else if($1.tipo != BOOLEANO && $4.tipo != BOOLEANO) {
 			if($1.tipo == ENTERO) {
-				$$.cod = $1.cod
+				$$.cod = $4.cod
 						+ "mov A " + IntToString(ptr_label) + "\n"
-						+ "mov " + IntToString($1.dir) + " A\n"
+						//+ "mov " + IntToString($1.dir) + " A\n"
+						+ $1.cod
 						+ "itor\n"
 						+ relopToM2R($2.lexema, REAL) + IntToString(ptr_label) + "\n";
 			} else {
 				$$.cod = $4.cod
 						+ "itor\n"
 						+ "mov A " + IntToString(ptr_label) + "\n"
-						+ "mov " + IntToString($1.dir) + " A\n"
+						//+ "mov " + IntToString($1.dir) + " A\n"
+						+ $1.cod
 						+ relopToM2R($2.lexema, REAL) + IntToString(ptr_label) + "\n";
 			}
 		} else 
@@ -475,18 +480,20 @@ Esimple : Esimple addop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR
 		if($4.tipo != ENTERO && $4.tipo != REAL) msgError(ERR_NUM, nlin, ncol, $2.lexema);
 		ptr_label = NTemp();
 
-		if($1.tipo = $4.tipo) {
+		if($1.tipo == $4.tipo) {
 			$$.tipo = $4.tipo;
 
 			if($1.tipo == ENTERO) {
 				$$.cod = $4.cod
 						+ "mov A " + IntToString(ptr_label) + "\n"
-						+ "mov " + IntToString($1.dir) + " A\n"
+						//+ "mov " + IntToString($1.dir) + " A\n"
+						+ $1.cod
 						+ addopToM2R($2.lexema, ENTERO) + IntToString(ptr_label) + "\n";
 			} else {
 				$$.cod = $4.cod
 						+ "mov A " + IntToString(ptr_label) + "\n"
-						+ "mov " + IntToString($1.dir) + " A\n"
+						//+ "mov " + IntToString($1.dir) + " A\n"
+						+ $1.cod
 						+ addopToM2R($2.lexema, REAL) + IntToString(ptr_label) + "\n";
 			}
 		} else {
@@ -495,14 +502,16 @@ Esimple : Esimple addop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR
 			if($1.tipo == ENTERO) {
 				$$.cod = $4.cod
 						+ "mov A " + IntToString(ptr_label) + "\n"
-						+ "mov " + IntToString($1.dir) + " A\n"
+						//+ "mov " + IntToString($1.dir) + " A\n"
+						+ $1.cod
 						+ "itor\n"
 						+ addopToM2R($2.lexema, REAL) + IntToString(ptr_label) + "\n";
 			} else {
 				$$.cod = $4.cod
 						+ "itor\n"
 						+ "mov A " + IntToString(ptr_label) + "\n"
-						+ "mov " + IntToString($1.dir) + " A\n"
+						//+ "mov " + IntToString($1.dir) + " A\n"
+						+ $1.cod
 						+ addopToM2R($2.lexema, REAL) + IntToString(ptr_label) + "\n";
 			}
 		}
@@ -519,18 +528,20 @@ Term : Term mulop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR_NUM, 
 		if($4.tipo != ENTERO && $4.tipo != REAL) msgError(ERR_NUM, nlin, ncol, $2.lexema);
 		ptr_label = NTemp();
 
-		if($1.tipo = $4.tipo) {
+		if($1.tipo == $4.tipo) {
 			$$.tipo = $4.tipo;
 
 			if($1.tipo == ENTERO) {
 				$$.cod = $4.cod
 						+ "mov A " + IntToString(ptr_label) + "\n"
-						+ "mov " + IntToString($1.dir) + " A\n"
+						//+ "mov " + IntToString($1.dir) + " A\n"
+						+ $1.cod
 						+ mulopToM2R($2.lexema, ENTERO) + IntToString(ptr_label) + "\n";
 			} else {
 				$$.cod = $4.cod
 						+ "mov A " + IntToString(ptr_label) + "\n"
-						+ "mov " + IntToString($1.dir) + " A\n"
+						//+ "mov " + IntToString($1.dir) + " A\n"
+						+ $1.cod
 						+ mulopToM2R($2.lexema, REAL) + IntToString(ptr_label) + "\n";
 			}
 		} else {
@@ -539,14 +550,15 @@ Term : Term mulop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR_NUM, 
 			if($1.tipo == ENTERO) {
 				$$.cod = $4.cod
 						+ "mov A " + IntToString(ptr_label) + "\n"
-						+ "mov " + IntToString($1.dir) + " A\n"
+						+ $1.cod
 						+ "itor\n"
 						+ mulopToM2R($2.lexema, REAL) + IntToString(ptr_label) + "\n";
 			} else {
 				$$.cod = $4.cod
 						+ "itor\n"
 						+ "mov A " + IntToString(ptr_label) + "\n"
-						+ "mov " + IntToString($1.dir) + " A\n"
+						//+ "mov " + IntToString($1.dir) + " A\n"
+						+ $1.cod
 						+ mulopToM2R($2.lexema, REAL) + IntToString(ptr_label) + "\n";
 			}
 		}
@@ -646,37 +658,30 @@ Factor : Ref {
 			if($5.tipo == BOOLEANO) {
 				if($2.tipo == ENTERO) {
 					$$.cod 	= $5.cod
-								+ "ori #0\n"
-								+ "mov A " + IntToString(ptr_label) + "\n";
+								+ "ori #0\n";
 				} else {
 					$$.cod 	= $5.cod
-								+ "orr #0\n"
-								+ "mov A " + IntToString(ptr_label) + "\n";
+								+ "orr #0\n";
 				}
 			} else if($5.tipo == ENTERO) {
 				if($2.tipo == BOOLEANO) {
 						$$.cod 	= $5.cod
-									+ "andi #1\n"
-									+ "mov A " + IntToString(ptr_label) + "\n";
+									+ "andi #1\n";
 				} else {
 					$$.cod 	= $5.cod
-								+ "itor\n"
-								+ "mov A " + IntToString(ptr_label) + "\n";
+								+ "itor\n";
 				}
 			} else {
 				if($2.tipo == BOOLEANO) {
 						$$.cod 	= $5.cod
-									+ "andr #1\n"
-									+ "mov A " + IntToString(ptr_label) + "\n";
+									+ "andr #1\n";
 				} else {
 					$$.cod 	= $5.cod
-								+ "rtoi\n"
-								+ "mov A " + IntToString(ptr_label) + "\n";
+								+ "rtoi\n";
 				}
 			}
 		}
 	};
-
 Ref : id {
 		//cout << "dimensiones" << getDimensionesVector($1.lexema)<< endl;
 		if(DEBUG) std::cout << " - Leído Ref 1...\n";
