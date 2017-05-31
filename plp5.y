@@ -716,6 +716,7 @@ Ref : id {
 				$$.dir = ptr_tmp;
 				//$$.dBase	= getTBaseVector(s.idTipo);
 				$$.dBase = $1.dir;
+				$$.esArray = true;
 				$$.cod 		= "mov #0 " + IntToString(ptr_tmp) + "\n";
 			}
 			else {
@@ -723,6 +724,7 @@ Ref : id {
 				$$.tipo = s.idTipo;
 				if(DEBUG) std::cout << "Ref -> id, símbolo [lex]" << s.lexema << "\t[dir]"<< s.dir << "\t[tipo]" << s.idTipo << "\n";
 				$$.cod = "mov "+ IntToString(s.dir) + " A\n";
+				$$.esArray = false;
 			}
 		}
 	}

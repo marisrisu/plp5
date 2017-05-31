@@ -1,3 +1,0 @@
-mov $2.5 A
-mov A 16015
-halt
