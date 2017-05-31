@@ -382,7 +382,7 @@ Instr : pyc_ {
 	| if_ pari_ Expr pard_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 6...\n";	
 		$$.cod = $3.cod;
-		$$.cod += "mov " + IntToString($3.dir) + " A\n";
+		//$$.cod += "mov " + IntToString($3.dir) + " A\n";
 		$$.cod += "jz L" + IntToString(++ptr_label) + "\n";
 		$$.cod += $5.cod;
 		$$.cod += "L" + IntToString(ptr_label) + " ";
@@ -391,7 +391,7 @@ Instr : pyc_ {
 	| if_ pari_ Expr pard_ Instr else_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 7...\n";	
 		$$.cod = $3.cod;
-		$$.cod += "mov " + IntToString($3.dir) + " A\n";
+		//$$.cod += "mov " + IntToString($3.dir) + " A\n";
 		$$.cod += "jz L" + IntToString(++ptr_label) + "\n";
 		$$.cod += $5.cod;
 		$$.cod += "jmp " + IntToString(++ptr_label) +"\n";
@@ -401,7 +401,7 @@ Instr : pyc_ {
 	| while_ pari_ Expr pard_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 8...\n";	
 		$$.cod = "L"+ IntToString(++ptr_label) + $3.cod;
-		$$.cod += "mov " + IntToString($3.dir) + " A\n";
+		//$$.cod += "mov " + IntToString($3.dir) + " A\n";
 		$$.cod += "jz L" + IntToString(++ptr_label) + "\n";
 		$$.cod += $5.cod;
 		$$.cod += "jmp L" + IntToString(ptr_label - 1) +"\n";

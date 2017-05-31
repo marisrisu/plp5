@@ -8,7 +8,6 @@ mov A 16015
 mov 2 A
 itor
 gtrr 16015
-mov 2 A
 jz L1
 mov #9 A
 mov A 16025

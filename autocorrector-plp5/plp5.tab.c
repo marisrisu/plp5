@@ -1842,7 +1842,7 @@ yyreduce:
     {
 		if(DEBUG) std::cout << " - Leído Instr 6...\n";	
 		(yyval).cod = (yyvsp[-2]).cod;
-		(yyval).cod += "mov " + IntToString((yyvsp[-2]).dir) + " A\n";
+		//$$.cod += "mov " + IntToString($3.dir) + " A\n";
 		(yyval).cod += "jz L" + IntToString(++ptr_label) + "\n";
 		(yyval).cod += (yyvsp[0]).cod;
 		(yyval).cod += "L" + IntToString(ptr_label) + " ";
@@ -1856,7 +1856,7 @@ yyreduce:
     {
 		if(DEBUG) std::cout << " - Leído Instr 7...\n";	
 		(yyval).cod = (yyvsp[-4]).cod;
-		(yyval).cod += "mov " + IntToString((yyvsp[-4]).dir) + " A\n";
+		//$$.cod += "mov " + IntToString($3.dir) + " A\n";
 		(yyval).cod += "jz L" + IntToString(++ptr_label) + "\n";
 		(yyval).cod += (yyvsp[-2]).cod;
 		(yyval).cod += "jmp " + IntToString(++ptr_label) +"\n";

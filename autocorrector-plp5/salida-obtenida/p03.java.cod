@@ -34,7 +34,6 @@ L4 mov 1 A
 mov A 16035
 mov 0 A
 eqli 16035
-mov 0 A
 jz L9
 rdi 16046
 mov A 24
