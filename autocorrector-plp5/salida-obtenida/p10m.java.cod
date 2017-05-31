@@ -3,21 +3,21 @@ mov #0 16003
 mov 16002 A
 muli #1
 addi 16003
-mov A16004
+mov A 16004
 mov #1 16005
 mov 16004 A
 muli #2
 addi 16005
-mov A16006
+mov A 16006
 mov #2 16007
 mov 16006 A
 muli #3
 addi 16007
-mov A16008
+mov A 16008
 mov #3 16009
 mov 16008 A
 muli #4
 addi 16009
-mov A16010
+mov A 16010
 mov 16010 576
 halt

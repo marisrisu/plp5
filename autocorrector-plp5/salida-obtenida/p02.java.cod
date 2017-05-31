@@ -108,11 +108,11 @@ mov #0 16061
 mov 16061 A
 muli #5
 addi 0
-mov A16062
+mov A 16062
 mov 16062 A
 muli #5
 addi 1
-mov A16063
+mov A 16063
 mov 16063 A
 neqi 16064
 mov A 16065
@@ -141,7 +141,7 @@ mov A 16077
 mov 16075 A
 muli #5
 addi 16077
-mov A16078
+mov A 16078
 mov #1 16079
 mov 1 A
 addi 16079
@@ -149,7 +149,7 @@ mov A 16080
 mov 16078 A
 muli #5
 addi 16080
-mov A16081
+mov A 16081
 mov 16081 A
 neqi 16082
 mov A 16083
@@ -195,11 +195,11 @@ mov A 16099
 mov 16097 A
 muli #5
 addi 16099
-mov A16100
+mov A 16100
 mov 16100 A
 muli #5
 addi 1
-mov A16101
+mov A 16101
 mov 16101 A
 neqi 16102
 mov A 16103
@@ -236,7 +236,7 @@ mov #0 16115
 mov 16115 A
 muli #5
 addi 0
-mov A16116
+mov A 16116
 mov #1 16117
 mov 1 A
 addi 16117
@@ -244,7 +244,7 @@ mov A 16118
 mov 16116 A
 muli #5
 addi 16118
-mov A16119
+mov A 16119
 mov 16119 A
 neqi 16120
 mov A 16121
@@ -347,11 +347,11 @@ mov #0 16163
 mov 16163 A
 muli #5
 addi 0
-mov A16164
+mov A 16164
 mov 16164 A
 muli #5
 addi 1
-mov A16165
+mov A 16165
 mov 16165 A
 neqi 16166
 mov A 16167
@@ -380,7 +380,7 @@ mov A 16179
 mov 16177 A
 muli #5
 addi 16179
-mov A16180
+mov A 16180
 mov #1 16181
 mov 1 A
 addi 16181
@@ -388,7 +388,7 @@ mov A 16182
 mov 16180 A
 muli #5
 addi 16182
-mov A16183
+mov A 16183
 mov 16183 A
 neqi 16184
 mov A 16185
@@ -434,11 +434,11 @@ mov A 16201
 mov 16199 A
 muli #5
 addi 16201
-mov A16202
+mov A 16202
 mov 16202 A
 muli #5
 addi 1
-mov A16203
+mov A 16203
 mov 16203 A
 neqi 16204
 mov A 16205
@@ -475,7 +475,7 @@ mov #0 16217
 mov 16217 A
 muli #5
 addi 0
-mov A16218
+mov A 16218
 mov #1 16219
 mov 1 A
 addi 16219
@@ -483,7 +483,7 @@ mov A 16220
 mov 16218 A
 muli #5
 addi 16220
-mov A16221
+mov A 16221
 mov 16221 A
 neqi 16222
 mov A 16223

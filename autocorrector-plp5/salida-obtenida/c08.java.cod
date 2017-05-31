@@ -1,0 +1,14 @@
+mov #2 16003
+mov 16003 0
+mov #3 16004
+mov 16004 1
+mov 0 A
+eqli 1
+mov A 16005
+mov 16005 A
+jz L1
+mov 1 A
+wri A 
+wrl
+L1
+halt

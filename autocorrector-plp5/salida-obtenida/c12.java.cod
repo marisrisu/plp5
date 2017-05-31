@@ -1,0 +1,12 @@
+mov $2.0 16003
+mov 16003 0
+mov #1 16004
+mov 16004 1
+mov #3 16005
+mov 16005 A
+jz L1
+mov 1 A
+wrr A 
+wrl
+L1
+halt

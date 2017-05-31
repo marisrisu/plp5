@@ -65,11 +65,11 @@ mov #0 16034
 mov 16034 A
 muli #4
 addi 0
-mov A16035
+mov A 16035
 mov 16035 A
 muli #4
 addi 1
-mov A16036
+mov A 16036
 mov 22 A
 addi 16036
 mov A 16037

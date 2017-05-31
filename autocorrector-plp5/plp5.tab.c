@@ -586,13 +586,13 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint16 yyrline[] =
 {
        0,   171,   171,   180,   185,   190,   194,   199,   204,   210,
-     216,   221,   225,   231,   231,   231,   236,   239,   243,   243,
-     248,   248,   256,   263,   267,   272,   272,   278,   285,   291,
-     291,   297,   304,   309,   314,   318,   324,   337,   352,   365,
-     374,   384,   394,   394,   405,   414,   414,   425,   434,   434,
-     480,   489,   489,   531,   540,   540,   582,   591,   599,   611,
-     623,   630,   637,   644,   651,   657,   668,   668,   721,   747,
-     747
+     216,   222,   227,   234,   234,   234,   239,   242,   246,   246,
+     251,   251,   259,   266,   270,   275,   275,   281,   288,   294,
+     294,   300,   307,   312,   317,   321,   327,   340,   355,   368,
+     377,   387,   397,   397,   408,   417,   417,   428,   437,   437,
+     483,   492,   492,   534,   543,   543,   585,   594,   602,   614,
+     626,   633,   640,   647,   654,   660,   671,   671,   724,   750,
+     750
 };
 #endif
 
@@ -1548,237 +1548,240 @@ yyreduce:
     {
 		if(DEBUG) std::cout << " - Leído Tipo 1...\n";
 		(yyval).tipo = ENTERO;
+		(yyval).lexema = (yyvsp[0]).lexema;
 
 	}
-#line 1554 "plp5.tab.c" /* yacc.c:1646  */
+#line 1555 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 221 "plp5.y" /* yacc.c:1646  */
+#line 222 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Tipo 2...\n";
 		(yyval).tipo = REAL;
+		(yyval).lexema = (yyvsp[0]).lexema;
 	 }
-#line 1563 "plp5.tab.c" /* yacc.c:1646  */
+#line 1565 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 225 "plp5.y" /* yacc.c:1646  */
+#line 227 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Tipo 3...\n";
 		(yyval).tipo = BOOLEANO;
+		(yyval).lexema = (yyvsp[0]).lexema;
 
 	 }
-#line 1573 "plp5.tab.c" /* yacc.c:1646  */
+#line 1576 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 231 "plp5.y" /* yacc.c:1646  */
+#line 234 "plp5.y" /* yacc.c:1646  */
     { crear_ambito(" "); }
-#line 1579 "plp5.tab.c" /* yacc.c:1646  */
+#line 1582 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 231 "plp5.y" /* yacc.c:1646  */
+#line 234 "plp5.y" /* yacc.c:1646  */
     { destruir_ambito_actual(); }
-#line 1585 "plp5.tab.c" /* yacc.c:1646  */
+#line 1588 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 231 "plp5.y" /* yacc.c:1646  */
+#line 234 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Bloque...\n";
 		(yyval).cod = (yyvsp[-2]).cod;
 }
-#line 1594 "plp5.tab.c" /* yacc.c:1646  */
+#line 1597 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 236 "plp5.y" /* yacc.c:1646  */
+#line 239 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído BDecl 1...\n";
 }
-#line 1602 "plp5.tab.c" /* yacc.c:1646  */
+#line 1605 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 239 "plp5.y" /* yacc.c:1646  */
+#line 242 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído BDecl 2...\n";
 	  }
-#line 1610 "plp5.tab.c" /* yacc.c:1646  */
+#line 1613 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 243 "plp5.y" /* yacc.c:1646  */
+#line 246 "plp5.y" /* yacc.c:1646  */
     {(yyval).tipo = (yyvsp[0]).tipo;}
-#line 1616 "plp5.tab.c" /* yacc.c:1646  */
+#line 1619 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 243 "plp5.y" /* yacc.c:1646  */
+#line 246 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído DVar 1...\n";
 	    (yyval).tipo = (yyvsp[-3]).tipo;
 
     }
-#line 1626 "plp5.tab.c" /* yacc.c:1646  */
+#line 1629 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 248 "plp5.y" /* yacc.c:1646  */
-    {if((yyvsp[-5]).tipo != (yyvsp[0]).tipo) msgError(ERR_TIPOSDECLARRAY, nlin,ncol,(yyvsp[-5]).lexema); (yyval).tipo = (yyvsp[-5]).tipo;}
-#line 1632 "plp5.tab.c" /* yacc.c:1646  */
+#line 251 "plp5.y" /* yacc.c:1646  */
+    {if((yyvsp[-5]).tipo != (yyvsp[0]).tipo) msgError(ERR_TIPOSDECLARRAY, (yyvsp[-5]).nlin,(yyvsp[-5]).ncol,(yyvsp[-5]).lexema); (yyval).tipo = (yyvsp[-5]).tipo;}
+#line 1635 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 248 "plp5.y" /* yacc.c:1646  */
+#line 251 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído DVar 2...\n";
-		if((yyvsp[-7]).dir != (yyvsp[-1]).dBase) msgError(ERR_DIMSDECLARRAY,nlin,ncol, (yyvsp[-6]).lexema);
+		if((yyvsp[-7]).dir != (yyvsp[-1]).dBase) msgError(ERR_DIMSDECLARRAY,(yyvsp[-6]).nlin,(yyvsp[-6]).ncol, (yyvsp[-6]).lexema);
 		(yyval).tipo = (yyvsp[-8]).tipo;
 		nuevoSimbolo((yyvsp[-6]).lexema, true, (yyvsp[-1]).tipo, (yyvsp[-6]).nlin, (yyvsp[-6]).ncol);
 
 
    }
-#line 1645 "plp5.tab.c" /* yacc.c:1646  */
+#line 1648 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 256 "plp5.y" /* yacc.c:1646  */
+#line 259 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído DVar 3...\n";
 		(yyval).tipo = SCANNER;
 		nuevoSimbolo((yyvsp[-9]).lexema, false, SCANNER, nlin, ncol);
 
    }
-#line 1656 "plp5.tab.c" /* yacc.c:1646  */
+#line 1659 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 263 "plp5.y" /* yacc.c:1646  */
+#line 266 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído DimSN 1...\n";
 		(yyval).dir +=1;
 }
-#line 1665 "plp5.tab.c" /* yacc.c:1646  */
+#line 1668 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 267 "plp5.y" /* yacc.c:1646  */
+#line 270 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído DimSN 2...\n";
 		(yyval).dir = 1;
     }
-#line 1674 "plp5.tab.c" /* yacc.c:1646  */
+#line 1677 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 272 "plp5.y" /* yacc.c:1646  */
+#line 275 "plp5.y" /* yacc.c:1646  */
     {(yyval).dBase =1; (yyval).tipo = (yyvsp[-3]).tipo; }
-#line 1680 "plp5.tab.c" /* yacc.c:1646  */
+#line 1683 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 272 "plp5.y" /* yacc.c:1646  */
+#line 275 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Dimensiones 1...\n";
 		(yyval).tipo = nuevoTipo(std::atoi((yyvsp[-3]).lexema), (yyvsp[0]).tipo);
 		(yyval).dBase =(yyvsp[0]).dBase + 1;
 
 	}
-#line 1691 "plp5.tab.c" /* yacc.c:1646  */
+#line 1694 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 278 "plp5.y" /* yacc.c:1646  */
+#line 281 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Dimensiones 2...\n";
         (yyval).tipo = nuevoTipo(std::atoi((yyvsp[-1]).lexema), (yyvsp[-3]).tipo);
         (yyval).dBase = 1;
       }
-#line 1701 "plp5.tab.c" /* yacc.c:1646  */
+#line 1704 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 285 "plp5.y" /* yacc.c:1646  */
+#line 288 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído LIdent 1...\n";
 		(yyval).lexema = (yyvsp[0]).lexema;
 		nuevoSimbolo((yyvsp[0]).lexema,false, (yyvsp[-3]).tipo,(yyvsp[0]).nlin,(yyvsp[0]).ncol );
 
 	}
-#line 1712 "plp5.tab.c" /* yacc.c:1646  */
+#line 1715 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 291 "plp5.y" /* yacc.c:1646  */
+#line 294 "plp5.y" /* yacc.c:1646  */
     {(yyval).tipo = (yyvsp[0]).tipo;}
-#line 1718 "plp5.tab.c" /* yacc.c:1646  */
+#line 1721 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 291 "plp5.y" /* yacc.c:1646  */
+#line 294 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído LIdent 2...\n";
 		(yyval).lexema = (yyvsp[0]).lexema;
 		nuevoSimbolo((yyval).lexema, false, (yyvsp[-2]).tipo, (yyvsp[0]).nlin,(yyvsp[0]).ncol);
 	}
-#line 1728 "plp5.tab.c" /* yacc.c:1646  */
+#line 1731 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 297 "plp5.y" /* yacc.c:1646  */
+#line 300 "plp5.y" /* yacc.c:1646  */
     {
 	if(DEBUG) std::cout << " - Leído Variable...\n";
 	ptr_tmp = NTemp();
 	(yyval).dir = ptr_tmp;
 	(yyval).lexema = (yyvsp[0]).lexema;
 }
-#line 1739 "plp5.tab.c" /* yacc.c:1646  */
+#line 1742 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 304 "plp5.y" /* yacc.c:1646  */
+#line 307 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído SeqInstr 1...\n";
 		(yyval).cod = (yyvsp[-1]).cod + (yyvsp[0]).cod;
 		
 	}
-#line 1749 "plp5.tab.c" /* yacc.c:1646  */
+#line 1752 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 309 "plp5.y" /* yacc.c:1646  */
+#line 312 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído SeqInstr 2...\n";
 		(yyval).cod = "";
 	}
-#line 1758 "plp5.tab.c" /* yacc.c:1646  */
+#line 1761 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 314 "plp5.y" /* yacc.c:1646  */
+#line 317 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Instr 1...\n";	
 
 	}
-#line 1767 "plp5.tab.c" /* yacc.c:1646  */
+#line 1770 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 318 "plp5.y" /* yacc.c:1646  */
+#line 321 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Instr 2...\n";	
 		(yyval).dir = (yyvsp[0]).dir;
 		(yyval).cod = (yyvsp[0]).cod;
 		(yyval).tipo = (yyvsp[0]).tipo;
 	}
-#line 1778 "plp5.tab.c" /* yacc.c:1646  */
+#line 1781 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 324 "plp5.y" /* yacc.c:1646  */
+#line 327 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Instr 3...\n";	
 		if((yyvsp[-3]).dBase == ENTERO && (yyvsp[-1]).tipo == REAL)	msgError(ERR_TIPOSASIG,nlin,ncol,"");
@@ -1792,11 +1795,11 @@ yyreduce:
 			(yyval).dir = (yyvsp[-1]).dir;
 		}
 	}
-#line 1796 "plp5.tab.c" /* yacc.c:1646  */
+#line 1799 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 337 "plp5.y" /* yacc.c:1646  */
+#line 340 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Instr 4...\n";	
 		(yyval).tipo = (yyvsp[-2]).tipo;
@@ -1812,11 +1815,11 @@ yyreduce:
 
 		(yyval).cod += "wrl\n";
 	}
-#line 1816 "plp5.tab.c" /* yacc.c:1646  */
+#line 1819 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 352 "plp5.y" /* yacc.c:1646  */
+#line 355 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Instr 5...\n";	
 		(yyval).tipo = (yyvsp[-2]).tipo;
@@ -1830,11 +1833,11 @@ yyreduce:
 					+ "mov " + IntToString((yyvsp[-2]).dir) + " A\n"
 					+"wrr A \n";
 	}
-#line 1834 "plp5.tab.c" /* yacc.c:1646  */
+#line 1837 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 39:
-#line 365 "plp5.y" /* yacc.c:1646  */
+#line 368 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Instr 6...\n";	
 		(yyval).cod = (yyvsp[-2]).cod;
@@ -1844,11 +1847,11 @@ yyreduce:
 		(yyval).cod += "L" + IntToString(ptr_label) + "\n";
 		
 	}
-#line 1848 "plp5.tab.c" /* yacc.c:1646  */
+#line 1851 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 40:
-#line 374 "plp5.y" /* yacc.c:1646  */
+#line 377 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Instr 7...\n";	
 		(yyval).cod = (yyvsp[-4]).cod;
@@ -1859,11 +1862,11 @@ yyreduce:
 		(yyval).cod += "L" + IntToString(ptr_label - 1) + " " + (yyvsp[0]).cod;
 		(yyval).cod += "L" + IntToString(ptr_label) + "\n";
 	}
-#line 1863 "plp5.tab.c" /* yacc.c:1646  */
+#line 1866 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 384 "plp5.y" /* yacc.c:1646  */
+#line 387 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Instr 8...\n";	
 		(yyval).cod = "L"+ IntToString(++ptr_label) + " " + (yyvsp[-2]).cod;
@@ -1873,20 +1876,20 @@ yyreduce:
 		(yyval).cod += "jmp L" + IntToString(ptr_label - 1) +"\n";
 		(yyval).cod += "L" + IntToString(ptr_label) + "\n";
 }
-#line 1877 "plp5.tab.c" /* yacc.c:1646  */
+#line 1880 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 394 "plp5.y" /* yacc.c:1646  */
-    { if((yyvsp[-1]).tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, (yyvsp[0]).lexema); }
-#line 1883 "plp5.tab.c" /* yacc.c:1646  */
+#line 397 "plp5.y" /* yacc.c:1646  */
+    { if((yyvsp[-1]).tipo != BOOLEANO) msgError(ERR_OPNOBOOL, (yyvsp[0]).nlin, (yyvsp[0]).ncol, (yyvsp[0]).lexema); }
+#line 1886 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 394 "plp5.y" /* yacc.c:1646  */
+#line 397 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Expr 1...\n";	
-		if((yyvsp[0]).tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, (yyvsp[-2]).lexema);
+		if((yyvsp[0]).tipo != BOOLEANO) msgError(ERR_OPNOBOOL, (yyvsp[-2]).nlin, (yyvsp[-2]).ncol, (yyvsp[-2]).lexema);
 		(yyval).tipo = BOOLEANO;
 		ptr_tmp = NTemp();
 		(yyval).dir = ptr_tmp;
@@ -1895,11 +1898,11 @@ yyreduce:
 					+ "ori " + IntToString((yyvsp[-3]).dir) + "\n"
 					+ "mov A " + IntToString(ptr_tmp) + "\n";
 	}
-#line 1899 "plp5.tab.c" /* yacc.c:1646  */
+#line 1902 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 405 "plp5.y" /* yacc.c:1646  */
+#line 408 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Expr 2...\n";
 		(yyval).tipo 	= (yyvsp[0]).tipo;
@@ -1908,20 +1911,20 @@ yyreduce:
 		(yyval).dBase 	= (yyvsp[0]).dBase;
 		(yyval).esArray = (yyvsp[0]).esArray;
 	}
-#line 1912 "plp5.tab.c" /* yacc.c:1646  */
+#line 1915 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 414 "plp5.y" /* yacc.c:1646  */
-    { if((yyvsp[-1]).tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, (yyvsp[0]).lexema); }
-#line 1918 "plp5.tab.c" /* yacc.c:1646  */
+#line 417 "plp5.y" /* yacc.c:1646  */
+    { if((yyvsp[-1]).tipo != BOOLEANO) msgError(ERR_OPNOBOOL, (yyvsp[0]).nlin, (yyvsp[0]).ncol, (yyvsp[0]).lexema); }
+#line 1921 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 414 "plp5.y" /* yacc.c:1646  */
+#line 417 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído EConj 1...\n";
-		if((yyvsp[0]).tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, (yyvsp[-2]).lexema);
+		if((yyvsp[0]).tipo != BOOLEANO) msgError(ERR_OPNOBOOL, (yyvsp[-2]).nlin, (yyvsp[-2]).ncol, (yyvsp[-2]).lexema);
 		(yyval).tipo = BOOLEANO;
 		ptr_tmp = NTemp();
 		(yyval).dir = ptr_tmp;
@@ -1930,11 +1933,11 @@ yyreduce:
 					+ "andi " + IntToString((yyvsp[-3]).dir) + "\n"
 					+ "mov A " + IntToString(ptr_tmp) + "\n";
 	}
-#line 1934 "plp5.tab.c" /* yacc.c:1646  */
+#line 1937 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 425 "plp5.y" /* yacc.c:1646  */
+#line 428 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído EConj 2...\n";
 		(yyval).tipo 	= (yyvsp[0]).tipo;
@@ -1943,20 +1946,20 @@ yyreduce:
 		(yyval).dBase 	= (yyvsp[0]).dBase;
 		(yyval).esArray = (yyvsp[0]).esArray;
 	}
-#line 1947 "plp5.tab.c" /* yacc.c:1646  */
+#line 1950 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 434 "plp5.y" /* yacc.c:1646  */
-    { if((yyvsp[-1]).tipo != ENTERO && (yyvsp[-1]).tipo != REAL && (yyvsp[-1]).tipo != BOOLEANO) msgError(ERR_NUM, nlin, ncol, (yyvsp[0]).lexema); }
-#line 1953 "plp5.tab.c" /* yacc.c:1646  */
+#line 437 "plp5.y" /* yacc.c:1646  */
+    { if((yyvsp[-1]).tipo != ENTERO && (yyvsp[-1]).tipo != REAL && (yyvsp[-1]).tipo != BOOLEANO) msgError(ERR_NUM, (yyvsp[0]).nlin, (yyvsp[0]).ncol, (yyvsp[0]).lexema); }
+#line 1956 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 434 "plp5.y" /* yacc.c:1646  */
+#line 437 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído ERel 1...\n";
-		if((yyvsp[0]).tipo != ENTERO && (yyvsp[0]).tipo != REAL && (yyvsp[-3]).tipo != BOOLEANO) msgError(ERR_NUM, nlin, ncol, (yyvsp[-2]).lexema);
+		if((yyvsp[0]).tipo != ENTERO && (yyvsp[0]).tipo != REAL && (yyvsp[-3]).tipo != BOOLEANO) msgError(ERR_NUM, (yyvsp[-2]).nlin, (yyvsp[-2]).ncol, (yyvsp[-2]).lexema);
 		(yyval).tipo = BOOLEANO;
 		ptr_tmp = NTemp();
 		(yyval).dir = ptr_tmp;
@@ -2000,11 +2003,11 @@ yyreduce:
 		} else
 			msgError(ERR_TIPOS, nlin, ncol, (yyvsp[-2]).lexema);
 	}
-#line 2004 "plp5.tab.c" /* yacc.c:1646  */
+#line 2007 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 480 "plp5.y" /* yacc.c:1646  */
+#line 483 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído ERel 2...\n";
 		(yyval).tipo 	= (yyvsp[0]).tipo;
@@ -2013,20 +2016,20 @@ yyreduce:
 		(yyval).dBase 	= (yyvsp[0]).dBase;
 		(yyval).esArray = (yyvsp[0]).esArray;
 	}
-#line 2017 "plp5.tab.c" /* yacc.c:1646  */
+#line 2020 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 489 "plp5.y" /* yacc.c:1646  */
-    { if((yyvsp[-1]).tipo != ENTERO && (yyvsp[-1]).tipo != REAL) msgError(ERR_NUM, nlin, ncol, (yyvsp[0]).lexema); }
-#line 2023 "plp5.tab.c" /* yacc.c:1646  */
+#line 492 "plp5.y" /* yacc.c:1646  */
+    { if((yyvsp[-1]).tipo != ENTERO && (yyvsp[-1]).tipo != REAL) msgError(ERR_NUM, (yyvsp[0]).nlin, (yyvsp[0]).ncol, (yyvsp[0]).lexema); }
+#line 2026 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 489 "plp5.y" /* yacc.c:1646  */
+#line 492 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Esimple 1...\n";
-		if((yyvsp[0]).tipo != ENTERO && (yyvsp[0]).tipo != REAL) msgError(ERR_NUM, nlin, ncol, (yyvsp[-2]).lexema);
+		if((yyvsp[0]).tipo != ENTERO && (yyvsp[0]).tipo != REAL) msgError(ERR_NUM, (yyvsp[-2]).nlin, (yyvsp[-2]).ncol, (yyvsp[-2]).lexema);
 		ptr_tmp = NTemp();
 		(yyval).dir = ptr_tmp;
 
@@ -2066,11 +2069,11 @@ yyreduce:
 			}
 		}
 	}
-#line 2070 "plp5.tab.c" /* yacc.c:1646  */
+#line 2073 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 531 "plp5.y" /* yacc.c:1646  */
+#line 534 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Esimple 2...\n";
 		(yyval).tipo 	= (yyvsp[0]).tipo;
@@ -2079,20 +2082,20 @@ yyreduce:
 		(yyval).dBase 	= (yyvsp[0]).dBase;
 		(yyval).esArray = (yyvsp[0]).esArray;
 	}
-#line 2083 "plp5.tab.c" /* yacc.c:1646  */
+#line 2086 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 540 "plp5.y" /* yacc.c:1646  */
-    { if((yyvsp[-1]).tipo != ENTERO && (yyvsp[-1]).tipo != REAL) msgError(ERR_NUM, nlin, ncol, (yyvsp[0]).lexema); }
-#line 2089 "plp5.tab.c" /* yacc.c:1646  */
+#line 543 "plp5.y" /* yacc.c:1646  */
+    { if((yyvsp[-1]).tipo != ENTERO && (yyvsp[-1]).tipo != REAL) msgError(ERR_NUM, (yyvsp[0]).nlin, (yyvsp[0]).ncol, (yyvsp[0]).lexema); }
+#line 2092 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 540 "plp5.y" /* yacc.c:1646  */
+#line 543 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Term 1...\n";
-		if((yyvsp[0]).tipo != ENTERO && (yyvsp[0]).tipo != REAL) msgError(ERR_NUM, nlin, ncol, (yyvsp[-2]).lexema);
+		if((yyvsp[0]).tipo != ENTERO && (yyvsp[0]).tipo != REAL) msgError(ERR_NUM, (yyvsp[-2]).nlin, (yyvsp[-2]).ncol, (yyvsp[-2]).lexema);
 		ptr_tmp = NTemp();
 		(yyval).dir = ptr_tmp;
 
@@ -2132,11 +2135,11 @@ yyreduce:
 			}
 		}
 	}
-#line 2136 "plp5.tab.c" /* yacc.c:1646  */
+#line 2139 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 582 "plp5.y" /* yacc.c:1646  */
+#line 585 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Term 2...\n";
 		(yyval).tipo = (yyvsp[0]).tipo;
@@ -2145,11 +2148,11 @@ yyreduce:
 		(yyval).dBase = (yyvsp[0]).dBase;
 		(yyval).esArray = (yyvsp[0]).esArray;
 	}
-#line 2149 "plp5.tab.c" /* yacc.c:1646  */
+#line 2152 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 591 "plp5.y" /* yacc.c:1646  */
+#line 594 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Factor 1...\n";
 		(yyval).tipo 	= (yyvsp[0]).tipo;
@@ -2158,45 +2161,45 @@ yyreduce:
 		(yyval).dBase 	= (yyvsp[0]).dBase;
 		(yyval).esArray = (yyvsp[0]).esArray;
 	}
-#line 2162 "plp5.tab.c" /* yacc.c:1646  */
+#line 2165 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 599 "plp5.y" /* yacc.c:1646  */
+#line 602 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Factor 2...\n";
 		simbolo_t simbolo;
 		simbolo.lexema = (yyvsp[-4]).lexema;
 		buscar(simbolo,ambito);
-		if(simbolo.idTipo != SCANNER) msgError(ERR_NOSC,nlin,ncol,(yyvsp[-4]).lexema);
+		if(simbolo.idTipo != SCANNER) msgError(ERR_NOSC, (yyvsp[-4]).nlin, (yyvsp[-4]).ncol,(yyvsp[-4]).lexema);
 
 		ptr_tmp = NTemp();
 		(yyval).tipo = ENTERO;
 		(yyval).dir 	= ptr_tmp;
 		(yyval).cod 	= "rdi " + IntToString(ptr_tmp) + "\n";
 	}
-#line 2179 "plp5.tab.c" /* yacc.c:1646  */
+#line 2182 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 611 "plp5.y" /* yacc.c:1646  */
+#line 614 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Factor 3...\n";
 		simbolo_t simbolo;
 		simbolo.lexema = (yyvsp[-4]).lexema;
 		buscar(simbolo,ambito);
-		if(simbolo.idTipo != SCANNER) msgError(ERR_NOSC,nlin,ncol,(yyvsp[-4]).lexema);
+		if(simbolo.idTipo != SCANNER) msgError(ERR_NOSC,(yyvsp[-4]).nlin,(yyvsp[-4]).ncol,(yyvsp[-4]).lexema);
 
 		ptr_tmp = NTemp();
 		(yyval).tipo = REAL;
 		(yyval).dir 	= ptr_tmp;
 		(yyval).cod 	= "rdr " + IntToString(ptr_tmp) + "\n";
 	}
-#line 2196 "plp5.tab.c" /* yacc.c:1646  */
+#line 2199 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 623 "plp5.y" /* yacc.c:1646  */
+#line 626 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Factor 4...\n";
 		ptr_tmp = NTemp();
@@ -2204,11 +2207,11 @@ yyreduce:
 		(yyval).dir 	= ptr_tmp;
 		(yyval).cod 	= std::string("mov #") + (yyvsp[0]).lexema + " " + IntToString(ptr_tmp) + "\n";
 	}
-#line 2208 "plp5.tab.c" /* yacc.c:1646  */
+#line 2211 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 630 "plp5.y" /* yacc.c:1646  */
+#line 633 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Factor 5...\n";
 		ptr_tmp = NTemp();
@@ -2216,11 +2219,11 @@ yyreduce:
 		(yyval).dir 	= ptr_tmp;
 		(yyval).cod 	= std::string("mov $") + (yyvsp[0]).lexema + " " + IntToString(ptr_tmp) + "\n";
 	}
-#line 2220 "plp5.tab.c" /* yacc.c:1646  */
+#line 2223 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 62:
-#line 637 "plp5.y" /* yacc.c:1646  */
+#line 640 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Factor 6...\n";
 		ptr_tmp = NTemp();
@@ -2228,11 +2231,11 @@ yyreduce:
 		(yyval).dir 	= ptr_tmp;
 		(yyval).cod 	= "mov #1 " + IntToString(ptr_tmp) + "\n";
 	}
-#line 2232 "plp5.tab.c" /* yacc.c:1646  */
+#line 2235 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 63:
-#line 644 "plp5.y" /* yacc.c:1646  */
+#line 647 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Factor 7...\n";
 		ptr_tmp = NTemp();
@@ -2240,25 +2243,25 @@ yyreduce:
 		(yyval).dir 	= ptr_tmp;
 		(yyval).cod 	= "mov #0 " + IntToString(ptr_tmp) + "\n";
 	}
-#line 2244 "plp5.tab.c" /* yacc.c:1646  */
+#line 2247 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 64:
-#line 651 "plp5.y" /* yacc.c:1646  */
+#line 654 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Factor 8...\n";
 		(yyval).tipo = (yyvsp[-1]).tipo;
 		(yyval).dir 	= (yyvsp[-1]).dir;
 		(yyval).cod 	= (yyvsp[-1]).cod;
 	}
-#line 2255 "plp5.tab.c" /* yacc.c:1646  */
+#line 2258 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 65:
-#line 657 "plp5.y" /* yacc.c:1646  */
+#line 660 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Factor 9...\n";
-		if((yyvsp[0]).tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, (yyvsp[-1]).lexema);
+		if((yyvsp[0]).tipo != BOOLEANO) msgError(ERR_OPNOBOOL, (yyvsp[-1]).nlin, (yyvsp[-1]).ncol, (yyvsp[-1]).lexema);
 		ptr_tmp = NTemp();
 		(yyval).dir = ptr_tmp;
 		(yyval).tipo = (yyvsp[0]).tipo;
@@ -2267,21 +2270,21 @@ yyreduce:
 				+ "noti\n"
 				+ "mov A " + IntToString(ptr_tmp) + "\n";
 	}
-#line 2271 "plp5.tab.c" /* yacc.c:1646  */
+#line 2274 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 66:
-#line 668 "plp5.y" /* yacc.c:1646  */
+#line 671 "plp5.y" /* yacc.c:1646  */
     { if(!esBase((yyvsp[0]).tipo)) msgError(ERR_TIPOS,nlin,ncol,(yyvsp[0]).lexema); }
-#line 2277 "plp5.tab.c" /* yacc.c:1646  */
+#line 2280 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 67:
-#line 668 "plp5.y" /* yacc.c:1646  */
+#line 671 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Factor 10...\n";
 
-		if(!esBase((yyvsp[0]).tipo)) msgError(ERR_TIPOS,nlin,ncol,(yyvsp[0]).lexema);
+		if(!esBase((yyvsp[0]).tipo)) msgError(ERR_TIPOS,(yyvsp[-3]).nlin,(yyvsp[-3]).ncol,(yyvsp[-3]).lexema);
 
 		if((yyvsp[-3]).tipo == (yyvsp[0]).tipo) {
 			(yyval).tipo = (yyvsp[0]).tipo;
@@ -2331,11 +2334,11 @@ yyreduce:
 			}
 		}
 	}
-#line 2335 "plp5.tab.c" /* yacc.c:1646  */
+#line 2338 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 68:
-#line 721 "plp5.y" /* yacc.c:1646  */
+#line 724 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Ref 1...\n";
 		simbolo_t s;
@@ -2362,20 +2365,20 @@ yyreduce:
 			}
 		}
 	}
-#line 2366 "plp5.tab.c" /* yacc.c:1646  */
+#line 2369 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 69:
-#line 747 "plp5.y" /* yacc.c:1646  */
+#line 750 "plp5.y" /* yacc.c:1646  */
     { /*if(!$1.esArray) msgError(ERRFALTAN,nlin,ncol,"");*/ }
-#line 2372 "plp5.tab.c" /* yacc.c:1646  */
+#line 2375 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
   case 70:
-#line 748 "plp5.y" /* yacc.c:1646  */
+#line 750 "plp5.y" /* yacc.c:1646  */
     {
 		if(DEBUG) std::cout << " - Leído Ref 2...\n";
-		if(!esBase((yyvsp[-1]).tipo)) msgError(ERR_EXP_ENT,nlin,ncol,"");
+		if(!esBase((yyvsp[-1]).tipo)) msgError(ERR_EXP_ENT, (yyvsp[-1]).nlin, (yyvsp[-1]).ncol,"");
 		else {
 			tipo_t t;
 			buscarTipo((yyvsp[-4]).tipo, t);
@@ -2390,14 +2393,14 @@ yyreduce:
 					 + "mov " + IntToString((yyvsp[-4]).dir) + " A\n" 
 					 + "muli #" + IntToString(t.size) + "\n"
 					 + "addi " + IntToString((yyvsp[-1]).dir) + "\n"
-					 + "mov A" + IntToString(ptr_tmp) + "\n";
+					 + "mov A " + IntToString(ptr_tmp) + "\n";
 		}
 	}
-#line 2397 "plp5.tab.c" /* yacc.c:1646  */
+#line 2400 "plp5.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 2401 "plp5.tab.c" /* yacc.c:1646  */
+#line 2404 "plp5.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2625,7 +2628,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 770 "plp5.y" /* yacc.c:1906  */
+#line 772 "plp5.y" /* yacc.c:1906  */
 
 
 int getDimensionesVector(const char* lexema){

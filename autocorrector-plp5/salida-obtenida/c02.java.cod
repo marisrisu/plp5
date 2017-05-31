@@ -1,0 +1,6 @@
+rdi 16002
+mov 16002 1
+mov 1 A
+wri A 
+wrl
+halt

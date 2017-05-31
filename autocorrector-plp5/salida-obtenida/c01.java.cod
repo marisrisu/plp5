@@ -1,0 +1,42 @@
+mov #4 16011
+mov #5 16009
+mov #2 16008
+mov 16008 A
+muli 16009
+mov A 16010
+mov 16010 A
+divi 16011
+mov A 16012
+mov #3 16006
+mov #1 16005
+mov 16005 A
+subi 16006
+mov A 16007
+mov 16007 A
+addi 16012
+mov A 16013
+mov 16013 0
+mov 0 1
+mov #1 16014
+mov 0 A
+addi 16014
+mov A 16015
+mov 16015 2
+mov #2 16016
+mov 0 A
+addi 16016
+mov A 16017
+mov 16017 3
+mov 0 A
+wri A 
+wrl
+mov 1 A
+wri A 
+wrl
+mov 2 A
+wri A 
+wrl
+mov 3 A
+wri A 
+wrl
+halt
