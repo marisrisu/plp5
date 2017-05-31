@@ -329,8 +329,6 @@ Variable : id {
 	$$.lexema = $1.lexema;
 };
 
-
-
 SeqInstr : SeqInstr Instr {
 		if(DEBUG) std::cout << " - Leído SeqInstr 1...\n";
 		$$.cod = $1.cod + $2.cod;
@@ -383,16 +381,31 @@ Instr : pyc_ {
 	}
 	| if_ pari_ Expr pard_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 6...\n";	
-		$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod;
+		$$.cod = $3.cod;
+		$$.cod += "mov " + IntToString($3.dir) + " A\n";
+		$$.cod += "jz L" + IntToString(++ptr_label) + "\n";
+		$$.cod += $5.cod;
+		$$.cod += "L" + IntToString(ptr_label) + " ";
 		
 	}
 	| if_ pari_ Expr pard_ Instr else_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 7...\n";	
-		$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod + "jmp " + IntToString($7.dir) +"\n" + $7.cod;
+		$$.cod = $3.cod;
+		$$.cod += "mov " + IntToString($3.dir) + " A\n";
+		$$.cod += "jz L" + IntToString(++ptr_label) + "\n";
+		$$.cod += $5.cod;
+		$$.cod += "jmp " + IntToString(++ptr_label) +"\n";
+		$$.cod += "L" + IntToString(ptr_label - 1) + " " + $7.cod;
+		$$.cod += "L" + IntToString(ptr_label) + " ";
 	}
 	| while_ pari_ Expr pard_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 8...\n";	
-		$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod + "jmp " + IntToString($3.dir) +"\n";
+		$$.cod = "L"+ IntToString(++ptr_label) + $3.cod;
+		$$.cod += "mov " + IntToString($3.dir) + " A\n";
+		$$.cod += "jz L" + IntToString(++ptr_label) + "\n";
+		$$.cod += $5.cod;
+		$$.cod += "jmp L" + IntToString(ptr_label - 1) +"\n";
+		$$.cod += "L" + IntToString(ptr_label) + " ";
 };
 
 Expr : Expr or_ { if($1.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.lexema); } EConj {

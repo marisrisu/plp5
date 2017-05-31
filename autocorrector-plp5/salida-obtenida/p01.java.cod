@@ -9,7 +9,7 @@ mov 2 A
 itor
 gtrr 16015
 mov 2 A
-jz 0
+jz L1
 mov #9 A
 mov A 16025
 mov #10 A
@@ -32,7 +32,7 @@ mov A 4
 mov 4 A
 wri A 
 wrl
-mov 0 A
+L1 mov 0 A
 wrr A 
 wrl
 mov 2 A
