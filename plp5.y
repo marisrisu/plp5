@@ -117,6 +117,7 @@ void crear_ambito(const char* nombre);
 void destruir_ambito_actual();
 void destroy();
 int getDimensionesVector(const char* lexema);
+int getTBaseVector(int id);
 int NTemp();
 int getDir();
 std::string relopToM2R(const char *relop, int tipo);
@@ -351,9 +352,8 @@ Instr : pyc_ {
 	}
 	| Ref asig_ Expr pyc_ {
 		if(DEBUG) std::cout << " - Leído Instr 3...\n";	
-		cout <<" Ref , tipo " << $1.tipo << "Expre . tipo " << $3.tipo << endl;
-		if($1.tipo == ENTERO && $3.tipo == REAL)	msgError(ERR_TIPOSASIG,nlin,ncol,"");
-		if($1.tipo == SCANNER)						msgError(ERR_SCVAR, nlin,ncol,$1.lexema);
+		if($1.dBase == ENTERO && $3.tipo == REAL)	msgError(ERR_TIPOSASIG,nlin,ncol,"");
+		if($1.dBase == SCANNER)						msgError(ERR_SCVAR, nlin,ncol,$1.lexema);
 		else{
 			$$.cod = $3.cod;
 			if($1.tipo == REAL && $3.tipo == ENTERO)
@@ -684,7 +684,6 @@ Factor : Ref {
 		}
 	};
 Ref : id {
-		//cout << "dimensiones" << getDimensionesVector($1.lexema)<< endl;
 		if(DEBUG) std::cout << " - Leído Ref 1...\n";
 		simbolo_t s;
 		s.lexema = $1.lexema;
@@ -695,7 +694,7 @@ Ref : id {
 			$$.tipo = s.idTipo;
 			if(s.esArray) {
 				ptr_tmp 	= NTemp();
-				$$.dBase	= s.idTipo;
+				$$.dBase	= getTBaseVector(s.idTipo);
 				$$.cod 		= "mov #0 " + IntToString(ptr_tmp) + "\n";
 			}
 			else
@@ -705,7 +704,7 @@ Ref : id {
 	| Ref cori_ {if($1.esArray) msgError(ERRFALTAN,nlin,ncol,""); }
 	  Esimple {if(!esBase($4.tipo)) msgError(ERR_EXP_ENT,nlin,ncol,"");} cord_ {
 		if(DEBUG) std::cout << " - Leído Ref 2...\n";
-		if(esBase($1.tipo) && !$1.esArray) msgError(ERRSOBRAN,nlin,ncol,"");
+		if($1.tipo == getTBaseVector($1.dBase)) msgError(ERRSOBRAN,nlin,ncol,"");
 		else {
 			$$.tipo = tipoBase($1.tipo);
 			ptr_tmp = NTemp();

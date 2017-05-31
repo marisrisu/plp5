@@ -1,3 +1,104 @@
- Ref , tipo 1Expre . tipo 1
- Ref , tipo 1Expre . tipo 1
- Ref , tipo 1Expre . tipo 1
+mov #0 A
+mov A 0
+mov #0 A
+mov A 1
+mov #4 A
+mov A 16024
+mov 0 A
+lssi 16024
+mov 0 A
+jz 0
+mov #0 A
+mov A 1
+mov #4 A
+mov A 16027
+mov 1 A
+lssi 16027
+mov 1 A
+jz 0
+rdr 16030
+mov A 16029
+mov #1 A
+mov A 16032
+mov 1 A
+addi 16032
+mov A 1
+jmp 1
+mov #1 A
+mov A 16034
+mov 0 A
+addi 16034
+mov A 0
+jmp 0
+mov 1 A
+mov A 16035
+mov 0 A
+eqli 16035
+mov 0 A
+jz 0
+rdi 16046
+mov A 24
+mov #0 A
+mov A 0
+mov #0 A
+itor
+mov A 23
+mov #4 A
+mov A 16050
+mov 0 A
+lssi 16050
+mov 0 A
+jz 0
+mov #0 A
+mov A 1
+mov #0 A
+itor
+mov A 22
+mov #4 A
+mov A 16054
+mov 1 A
+lssi 16054
+mov 1 A
+jz 0
+mov 5 A
+mov 0 A
+mov 5 A
+muli #4
+addi 0
+mov 1 A
+mov 16055 A
+muli #1
+addi 1
+itor
+mov A 16057
+mov 22 A
+addr 16057
+mov A 22
+mov #1 A
+mov A 16059
+mov 1 A
+addi 16059
+mov A 1
+jmp 1
+mov 22 A
+wrr A 
+wrl
+mov #1 A
+mov A 16061
+mov 0 A
+addi 16061
+mov A 0
+mov 22 A
+mov A 16062
+mov 23 A
+addr 16062
+mov A 23
+jmp 0
+mov 24 A
+itor
+mov A 16063
+mov 23 A
+divr 16063
+wrr A 
+wrl
+halt

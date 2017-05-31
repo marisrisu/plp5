@@ -1,3 +1,4 @@
+0
 
-ERROR(m2r) al leer un valor de la posicion de memoria 16017 sin haberlo
-inicializado, en la instrucción 3
+ERROR(m2r) al leer un valor de la posicion de memoria 1 sin haberlo
+inicializado, en la instrucción 35
