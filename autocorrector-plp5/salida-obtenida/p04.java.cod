@@ -1,0 +1,59 @@
+mov #4 A
+mov A 16021
+mov 16017 A
+divi 16021
+mov A 16022
+mov 16014 A
+addi 16022
+mov A 0
+mov 0 A
+mov A 16034
+mov #1 A
+mov A 16048
+mov 0 A
+addi 16048
+mov A 16046
+mov #2 A
+mov A 16062
+mov 0 A
+addi 16062
+mov A 16060
+mov #3 A
+mov A 16076
+mov 0 A
+addi 16076
+mov A 16074
+mov 0 A
+wri A 
+wrl
+mov 1 A
+mov #0 A
+mov 1 A
+muli #1
+addi 16115
+mov #0 A
+mov 16116 A
+muli #1
+addi 16117
+mov #0 A
+mov 16118 A
+muli #1
+addi 16119
+mov #0 A
+mov 16120 A
+muli #1
+addi 16121
+mov #1 A
+mov 16122 A
+muli #1
+addi 16123
+mov #0 A
+mov 16124 A
+muli #1
+addi 16125
+mov A 16127
+mov 16088 A
+addi 16127
+wri A 
+wrl
+halt
