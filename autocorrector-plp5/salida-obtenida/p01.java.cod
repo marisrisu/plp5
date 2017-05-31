@@ -1,3 +1,7 @@
+ Ref , tipo 2Expre . tipo 2
+ Ref , tipo 1Expre . tipo 1
+ Ref , tipo 1Expre . tipo 1
+ Ref , tipo 1Expre . tipo 1
 mov $7.5 A
 mov A 0
 mov 0 A

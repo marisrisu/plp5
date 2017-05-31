@@ -115,6 +115,7 @@ void print_tabla_simbolos();
 void crear_ambito(const char* nombre);
 void destruir_ambito_actual();
 void destroy();
+int getDimensionesVector(const char* lexema);
 int NTemp();
 int getDir();
 std::string relopToM2R(const char *relop, int tipo);
@@ -349,6 +350,7 @@ Instr : pyc_ {
 	}
 	| Ref asig_ Expr pyc_ {
 		if(DEBUG) std::cout << " - Leído Instr 3...\n";	
+		cout <<" Ref , tipo " << $1.tipo << "Expre . tipo " << $3.tipo << endl;
 		if($1.tipo == ENTERO && $3.tipo == REAL)	msgError(ERR_TIPOSASIG,nlin,ncol,"");
 		if($1.tipo == SCANNER)						msgError(ERR_SCVAR, nlin,ncol,$1.lexema);
 		else{
@@ -676,6 +678,7 @@ Factor : Ref {
 	};
 
 Ref : id {
+		//cout << "dimensiones" << getDimensionesVector($1.lexema)<< endl;
 		if(DEBUG) std::cout << " - Leído Ref 1...\n";
 		simbolo_t s;
 		s.lexema = $1.lexema;
@@ -686,17 +689,17 @@ Ref : id {
 			$$.tipo = s.idTipo;
 			if(s.esArray) {
 				ptr_label 	= NTemp();
-				$$.dBase	= ptr_label;
+				$$.dBase	= s.idTipo;
 				$$.cod 		= "mov #0 " + IntToString(ptr_label) + "\n";
 			}
 			else
 				$$.cod = "mov "+ IntToString(s.dir) + " A\n";
 		}
 	}
-	| Ref cori_ {/*if(!$1.esArray) msgError(ERRFALTAN,$2.nlin,$2.ncol,"");*/} 
-	  Esimple cord_ {
+	| Ref cori_ {if($1.esArray) msgError(ERRFALTAN,nlin,ncol,""); }
+	  Esimple {if(!esBase($4.tipo)) msgError(ERR_EXP_ENT,nlin,ncol,"");} cord_ {
 		if(DEBUG) std::cout << " - Leído Ref 2...\n";
-		if(!esBase($4.tipo)){ msgError(ERR_EXP_ENT,nlin,ncol,"");}
+		if(esBase($1.tipo) && !$1.esArray) msgError(ERRSOBRAN,nlin,ncol,"");
 		else {
 			$$.tipo = tipoBase($1.tipo);
 			ptr_label = NTemp();
@@ -714,6 +717,30 @@ Ref : id {
   
 	
 %%
+
+int getDimensionesVector(const char* lexema){
+
+	simbolo_t simboloVector;
+	simboloVector.lexema = lexema;
+	buscarSimbolo(simboloVector);
+	int cont = 0;
+	tipo_t obj_tipo;
+	buscarTipo(simboloVector.idTipo,obj_tipo);
+	tipo_t tipo;
+	cont ++;
+	if(buscarTipo(obj_tipo.tipo_base,tipo)){
+
+		cont ++;
+		while(!esBase(tipo.tipo_base)) {
+			cont ++;
+			buscarTipo(obj_tipo.tipo_base,tipo);
+			obj_tipo.tipo_base = tipo.tipo_base;
+		}
+	}
+	return cont;
+}
+
+
 bool esBase(int tipo)
 {
   if(tipo <= 4)
@@ -918,7 +945,6 @@ void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
 	else{
 		msgError(ERRYADECL, lin, col, lexema);   // Error, simbolo ya declarado
 	}
-	print_tabla_simbolos();
 }
 
 

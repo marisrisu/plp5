@@ -6,17 +6,7 @@ public class p05m {
 
   public static void main(String[] args)
   {
-    int a,b,c,d,e,f,g;
-    b = 3;
-    c=4;
-
-    if(c > b)
-    {
-      int x;
-    }
-
-    if(b < c){
-      int x;
-    }
+    int[][] a = new int  [2][3];
+    a[1][1] = 0;
   }
 }
