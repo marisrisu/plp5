@@ -1,19 +1,23 @@
-mov #0 16015
-mov #0 16016
-mov 16015 A
+mov #0 16002
+mov #0 16003
+mov 16002 A
 muli #1
-addi 16016
-mov #1 16018
-mov 16017 A
+addi 16003
+mov A16004
+mov #1 16005
+mov 16004 A
 muli #2
-addi 16018
-mov #2 16020
-mov 16019 A
+addi 16005
+mov A16006
+mov #2 16007
+mov 16006 A
 muli #3
-addi 16020
-mov #3 16022
-mov 16021 A
+addi 16007
+mov A16008
+mov #3 16009
+mov 16008 A
 muli #4
-addi 16022
-mov 16023 576
+addi 16009
+mov A16010
+mov 16010 576
 halt

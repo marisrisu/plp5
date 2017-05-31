@@ -1,1 +1,5 @@
-ERROR, tiempo de ejecución agotado... (15 segundos)
+0
+0
+
+ERROR(m2r) al leer un valor de la posicion de memoria 16057 sin haberlo
+inicializado, en la instrucción 97

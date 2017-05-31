@@ -215,28 +215,16 @@ Main : public_ static_ void_ main_ pari_ string_ cori_ cord_ id pard_ Bloque  {
 
 Tipo : int_ {
 		if(DEBUG) std::cout << " - Leído Tipo 1...\n";
-		ptr_tmp = NTemp();
-		$$.dir = ptr_tmp;
-		$$.nlin = nlin;
-		$$.ncol = ncol;
 		$$.tipo = ENTERO;
 
 	}
 	  | double_ {
 		if(DEBUG) std::cout << " - Leído Tipo 2...\n";
-		ptr_tmp = NTemp();
-		$$.dir = ptr_tmp;
 		$$.tipo = REAL;
-		$$.nlin = nlin;
-		$$.ncol = ncol;
 	 }
 	  | boolean_ {
 		if(DEBUG) std::cout << " - Leído Tipo 3...\n";
-	  	ptr_tmp = NTemp();
-		$$.dir = ptr_tmp;
 		$$.tipo = BOOLEANO;
-		$$.nlin = nlin;
-		$$.ncol = ncol;
 
 	 };
 
@@ -247,7 +235,6 @@ Bloque : llavei_ { crear_ambito(" "); }  BDecl SeqInstr { destruir_ambito_actual
 
 BDecl : BDecl DVar {
 		if(DEBUG) std::cout << " - Leído BDecl 1...\n";
-
 }
 	   | {
 		if(DEBUG) std::cout << " - Leído BDecl 2...\n";
@@ -255,16 +242,12 @@ BDecl : BDecl DVar {
 
 DVar : Tipo {$$.tipo = $1.tipo;} LIdent pyc_ {
 		if(DEBUG) std::cout << " - Leído DVar 1...\n";
-	    ptr_tmp = NTemp();
-	    $$.dir = ptr_tmp;
 	    $$.tipo = $1.tipo;
 
     }
     | Tipo DimSN id asig_ new_ Tipo {if($1.tipo != $6.tipo) msgError(ERR_TIPOSDECLARRAY, nlin,ncol,$1.lexema); $$.tipo = $1.tipo;} Dimensiones pyc_ {
 		if(DEBUG) std::cout << " - Leído DVar 2...\n";
 		if($2.dir != $8.dBase) msgError(ERR_DIMSDECLARRAY,nlin,ncol, $3.lexema);
-		ptr_tmp = NTemp();
-		$$.dir = ptr_tmp;
 		$$.tipo = $1.tipo;
 		nuevoSimbolo($3.lexema, true, $8.tipo, $3.nlin, $3.ncol);
 
@@ -272,8 +255,6 @@ DVar : Tipo {$$.tipo = $1.tipo;} LIdent pyc_ {
    }
     | scanner_ id asig_ new_ scanner_ pari_ system_ punto_ in_ pard_ pyc_ {
 		if(DEBUG) std::cout << " - Leído DVar 3...\n";
-		ptr_tmp = NTemp();
-		$$.dir = ptr_tmp;
 		$$.tipo = SCANNER;
 		nuevoSimbolo($2.lexema, false, SCANNER, nlin, ncol);
 
@@ -290,42 +271,31 @@ DimSN : DimSN cori_ cord_ {
 
 Dimensiones : cori_ nentero cord_ {$$.dBase =1; $$.tipo = $0.tipo; } Dimensiones {
 		if(DEBUG) std::cout << " - Leído Dimensiones 1...\n";
-		ptr_tmp = NTemp();
-		$$.dir = ptr_tmp;
 		$$.tipo = nuevoTipo(std::atoi($2.lexema), $5.tipo);
 		$$.dBase =$5.dBase + 1;
 
 	}
        | cori_ nentero cord_ {
 		if(DEBUG) std::cout << " - Leído Dimensiones 2...\n";
-        ptr_tmp = NTemp();
-        $$.dir = ptr_tmp;
         $$.tipo = nuevoTipo(std::atoi($2.lexema), $0.tipo);
         $$.dBase = 1;
-
       };
 
 
 LIdent : LIdent coma_ Variable {
-
 		if(DEBUG) std::cout << " - Leído LIdent 1...\n";
-		ptr_tmp = NTemp();
-		$$.dir = ptr_tmp;
 		$$.lexema = $3.lexema;
 		nuevoSimbolo($3.lexema,false, $0.tipo,$3.nlin,$3.ncol );
 
 	}
 	| {$$.tipo = $0.tipo;} Variable {
 		if(DEBUG) std::cout << " - Leído LIdent 2...\n";
-		ptr_tmp = NTemp();
-		$$.dir = ptr_tmp;
 		$$.lexema = $2.lexema;
 		nuevoSimbolo($$.lexema, false, $0.tipo, $2.nlin,$2.ncol);
 	};
 
 Variable : id {
 	if(DEBUG) std::cout << " - Leído Variable...\n";
-
 	ptr_tmp = NTemp();
 	$$.dir = ptr_tmp;
 	$$.lexema = $1.lexema;
@@ -338,6 +308,7 @@ SeqInstr : SeqInstr Instr {
 	}
 	| {
 		if(DEBUG) std::cout << " - Leído SeqInstr 2...\n";
+		$$.cod = "";
 	};
 
 Instr : pyc_ {
@@ -790,7 +761,7 @@ Ref : id {
 			$$.cod = $1.cod + $4.cod
 					 + "mov " + IntToString($1.dir) + " A\n" 
 					 + "muli #" + IntToString(t.size) + "\n"
-					 + "addi " + IntToString($4.dir) + "\n";
+					 + "addi " + IntToString($4.dir) + "\n"
 					 + "mov A" + IntToString(ptr_tmp) + "\n";
 		}
 	};
