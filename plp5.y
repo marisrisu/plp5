@@ -110,7 +110,7 @@ typedef struct tabla_simbolos_t
   struct tabla_simbolos_t* ts_padre;
   std::vector<simbolo_t> simbolos;      
 }tabla_simbolos;
-
+bool buscar(simbolo_t s, tabla_simbolos_t*);
 bool lexema_existe(const char* lexema);
 void print_tabla_simbolos();
 void crear_ambito(const char* nombre);
@@ -1014,6 +1014,18 @@ bool buscarSimbolo(simbolo_t& simbolo) {    // simbolo debe llegar con el lexema
   }
   return false;
 } 
+
+
+bool buscar(simbolo_t s, tabla_simbolos* actual) {
+
+  for (int i = 0; i < simbolos.size(); i++)
+    if (s.lexema.compare(ambito->simbolos[i].lexema) == 0) return true;;
+
+  if (actual->ts_padre != NULL) return buscar(s, actual->ts_padre);
+  else        return false;
+}
+
+
 
 
 int NTemp(){
