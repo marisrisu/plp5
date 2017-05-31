@@ -111,6 +111,8 @@ typedef struct tabla_simbolos_t
   std::vector<simbolo_t> simbolos;      
 }tabla_simbolos;
 
+bool buscar(simbolo_t s, tabla_simbolos_t* t);
+
 bool lexema_existe(const char* lexema);
 void print_tabla_simbolos();
 void crear_ambito(const char* nombre);
@@ -595,7 +597,7 @@ Factor : Ref {
 		if(DEBUG) std::cout << " - Leído Factor 2...\n";
 		simbolo_t simbolo;
 		simbolo.lexema = $1.lexema;
-		buscarSimbolo(simbolo);
+		buscar(simbolo,ambito);
 		if(simbolo.idTipo != SCANNER) msgError(ERR_NOSC,nlin,ncol,$1.lexema);
 
 		ptr_tmp = NTemp();
@@ -607,7 +609,7 @@ Factor : Ref {
 		if(DEBUG) std::cout << " - Leído Factor 3...\n";
 		simbolo_t simbolo;
 		simbolo.lexema = $1.lexema;
-		buscarSimbolo(simbolo);
+		buscar(simbolo,ambito);
 		if(simbolo.idTipo != SCANNER) msgError(ERR_NOSC,nlin,ncol,$1.lexema);
 
 		ptr_tmp = NTemp();
@@ -700,13 +702,14 @@ Ref : id {
 		if(DEBUG) std::cout << " - Leído Ref 1...\n";
 		simbolo_t s;
 		s.lexema = $1.lexema;
-		if(!buscarSimbolo(s))
+		if(!buscar(s,ambito))
 			msgError(ERRNODECL,$1.nlin,$1.ncol, $1.lexema);
 		else{
 			$$.dir = 	s.dir;
 			$$.tipo = s.idTipo;
+			ptr_tmp 	= NTemp();
 			if(s.esArray) {
-				ptr_tmp 	= NTemp();
+
 				$$.dBase	= getTBaseVector(s.idTipo);
 				$$.cod 		= "mov #0 " + IntToString(ptr_tmp) + "\n";
 			}
@@ -740,7 +743,7 @@ int getDimensionesVector(const char* lexema){
 
 	simbolo_t simboloVector;
 	simboloVector.lexema = lexema;
-	buscarSimbolo(simboloVector);
+	buscar(simboloVector,ambito);
 	int cont = 0;
 	tipo_t obj_tipo;
 	buscarTipo(simboloVector.idTipo,obj_tipo);
@@ -927,7 +930,7 @@ int buscarDir(const char* lexema){
 
 	simbolo_t s;
 	s.lexema = lexema;
-	if(buscarSimbolo(s))
+	if(buscar(s,ambito))
 		return s.dir;
 
 }
@@ -937,9 +940,9 @@ void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
 						"\tIdx.Tipo: " << idTipo << 
 						"\tDir.: " << ptr_mem <<
 						"\tArray? " << esArray << "\n";
-
-	if(!existeSimbolo(lexema)) {  // Si no existe
-		simbolo_t s;
+	simbolo_t s;
+	s.lexema = lexema;
+	if(!buscar(s,ambito)) {  // Si no existe
 		tipo_t obj_tipo;
 		buscarTipo(idTipo, obj_tipo);
 
@@ -1030,7 +1033,7 @@ int buscarTipoSimbolo(const char * lexema) {
   
   simbolo_t simbolo;
   simbolo.lexema = lexema;
-  buscarSimbolo(simbolo);
+  buscar(simbolo,ambito);
   return simbolo.idTipo;
 }
 
@@ -1049,6 +1052,14 @@ bool buscarTipo(int tipo_buscado, tipo_t& t) {
   return false;
 }
 
+bool buscar(simbolo_t s, tabla_simbolos* actual) {
+
+  for (int i = 0; i < actual->simbolos.size(); i++)
+    if (s.lexema.compare(actual->simbolos[i].lexema) == 0) return true;;
+
+  if (actual->ts_padre != NULL) return buscar(s, actual->ts_padre);
+  else        return false;
+}
 
 
 void inicializarTablaTipos() {

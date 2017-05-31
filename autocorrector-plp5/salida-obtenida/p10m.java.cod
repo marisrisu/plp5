@@ -1,7 +1,7 @@
 mov 0 A
 mov #0 A
 mov 0 A
-muli #1
+muli #0
 addi 16015
 mov #1 A
 mov 16016 A
@@ -15,5 +15,5 @@ mov #3 A
 mov 16020 A
 muli #1
 addi 16021
-mov A 576
+mov A 0
 halt
