@@ -747,26 +747,20 @@ int getDimensionesVector(const char* lexema){
 }
 
 
-int getTBaseVector(const char* lexema){
+int getTBaseVector(int id){
 
-	simbolo_t simboloVector;
-	simboloVector.lexema = lexema;
-	buscarSimbolo(simboloVector);
-	int cont = 0;
 	tipo_t obj_tipo;
-	buscarTipo(simboloVector.idTipo,obj_tipo);
+	buscarTipo(id,obj_tipo);
 	tipo_t tipo;
-	cont ++;
+
 	if(buscarTipo(obj_tipo.tipo_base,tipo)){
 
-		cont ++;
 		while(!esBase(tipo.tipo_base)) {
-			cont ++;
 			buscarTipo(obj_tipo.tipo_base,tipo);
 			obj_tipo.tipo_base = tipo.tipo_base;
 		}
 	}
-	return obj_tipo.tipo_base;
+	return tipo.tipo_base;
 }
 
 
