@@ -334,6 +334,7 @@ SeqInstr : SeqInstr Instr {
 		
 	}
 	| {
+		$$.cod = "";
 		if(DEBUG) std::cout << " - Leído SeqInstr 2...\n";
 	};
 
@@ -918,7 +919,6 @@ void nuevoSimbolo(char* lexema, bool esArray, int idTipo, int lin, int col) {
 	else{
 		msgError(ERRYADECL, lin, col, lexema);   // Error, simbolo ya declarado
 	}
-	print_tabla_simbolos();
 }
 
 
@@ -926,14 +926,13 @@ bool existeSimbolo(const char* simbolo) {
   		
   if(DEBUG) std::cout << "Existe simbolo\n " ;
 
-  std::vector<simbolo_t>::iterator begin_it = ambito->simbolos.begin();
-  std::vector<simbolo_t>::iterator end_it   = ambito->simbolos.end();
+  std::vector<simbolo_t>::iterator begin_it = simbolos.begin();
+  std::vector<simbolo_t>::iterator end_it   = simbolos.end();
   std::vector<simbolo_t>::iterator it       = std::find_if(begin_it,end_it, find_simbolo(std::string(simbolo))); 
 
   return it != end_it;
 
 }
-
 bool buscarSimbolo(simbolo_t& simbolo) {    // simbolo debe llegar con el lexema y volvera con todos los atributos
   
   std::vector<simbolo_t>::iterator begin_it = ambito->simbolos.begin();
@@ -1058,6 +1057,24 @@ int nuevoTipo(int tam,int tipo_base) {
             "\tT.Base: " << tipo_base << "\n";
 
   tipo_t t;
+ /*switch(tipo_base)
+  {
+    case ENTERO: 
+      t.tipo_base = 0;
+      break;
+    case REAL:
+      t.tipo_base = 1;
+      break;
+    case BOOLEANO:
+      t.tipo_base = 2;
+      break;
+    case SCANNER:
+      t.tipo_base = 3;
+      break;
+    default:
+      t.tipo_base = tipo_base;
+      break;
+  }*/
   t.tipo_base = tipo_base;
   t.tipo    = ++contIdType;
   t.size    = tam;
@@ -1106,7 +1123,7 @@ int main(int argc,char *argv[])
         if (fent)
         {
         	crear_ambito("global");
-          	inicializarTablaTipos();
+          inicializarTablaTipos();
             yyin = fent;
             yyparse();
             fclose(fent);
