@@ -108,14 +108,16 @@ typedef struct tabla_simbolos_t
 {
   const char* nombre;
   struct tabla_simbolos_t* ts_padre;
-  std::vector<simbolo_t> simbolos;      
+  std::vector<simbolo_t> simbolos;
+
 }tabla_simbolos;
-bool buscar(simbolo_t s, tabla_simbolos_t*);
+
 bool lexema_existe(const char* lexema);
 void print_tabla_simbolos();
 void crear_ambito(const char* nombre);
 void destruir_ambito_actual();
 void destroy();
+bool buscar(simbolo_t s, tabla_simbolos_t* t);
 int getDimensionesVector(const char* lexema);
 int getTBaseVector(int id);
 int NTemp();
@@ -238,9 +240,9 @@ Tipo : int_ {
 
 	 };
 
-Bloque : llavei_ BDecl SeqInstr llaved_ {
+Bloque : llavei_ {if(ptr_label!=0)crear_ambito("hola");} BDecl SeqInstr llaved_ {if(ptr_label!=0)destruir_ambito_actual();}{
 		if(DEBUG) std::cout << " - Leído Bloque...\n";
-		$$.cod = $3.cod;
+		$$.cod = $4.cod;
 };
 
 BDecl : BDecl DVar {
@@ -329,6 +331,8 @@ Variable : id {
 	$$.lexema = $1.lexema;
 };
 
+
+
 SeqInstr : SeqInstr Instr {
 		if(DEBUG) std::cout << " - Leído SeqInstr 1...\n";
 		$$.cod = $1.cod + $2.cod;
@@ -342,11 +346,12 @@ Instr : pyc_ {
 		if(DEBUG) std::cout << " - Leído Instr 1...\n";	
 
 	}
-	| Bloque {
+	|Bloque {
 		if(DEBUG) std::cout << " - Leído Instr 2...\n";	
 		$$.dir = $1.dir;
 		$$.cod = $1.cod;
 		$$.tipo = $1.tipo;
+		
 	}
 	| Ref asig_ Expr pyc_ {
 		if(DEBUG) std::cout << " - Leído Instr 3...\n";	
@@ -381,31 +386,16 @@ Instr : pyc_ {
 	}
 	| if_ pari_ Expr pard_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 6...\n";	
-		$$.cod = $3.cod;
-		//$$.cod += "mov " + IntToString($3.dir) + " A\n";
-		$$.cod += "jz L" + IntToString(++ptr_label) + "\n";
-		$$.cod += $5.cod;
-		$$.cod += "L" + IntToString(ptr_label) + " ";
+		$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod;
 		
 	}
 	| if_ pari_ Expr pard_ Instr else_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 7...\n";	
-		$$.cod = $3.cod;
-		//$$.cod += "mov " + IntToString($3.dir) + " A\n";
-		$$.cod += "jz L" + IntToString(++ptr_label) + "\n";
-		$$.cod += $5.cod;
-		$$.cod += "jmp " + IntToString(++ptr_label) +"\n";
-		$$.cod += "L" + IntToString(ptr_label - 1) + " " + $7.cod;
-		$$.cod += "L" + IntToString(ptr_label) + " ";
+		$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod + "jmp " + IntToString($7.dir) +"\n" + $7.cod;
 	}
 	| while_ pari_ Expr pard_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 8...\n";	
-		$$.cod = "L"+ IntToString(++ptr_label) + $3.cod;
-		//$$.cod += "mov " + IntToString($3.dir) + " A\n";
-		$$.cod += "jz L" + IntToString(++ptr_label) + "\n";
-		$$.cod += $5.cod;
-		$$.cod += "jmp L" + IntToString(ptr_label - 1) +"\n";
-		$$.cod += "L" + IntToString(ptr_label) + " ";
+		$$.cod = $3.cod + "mov " + IntToString($3.dir) + " A\njz " + IntToString($5.dir) + "\n" + $5.cod + "jmp " + IntToString($3.dir) +"\n";
 };
 
 Expr : Expr or_ { if($1.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.lexema); } EConj {
@@ -701,6 +691,7 @@ Ref : id {
 		simbolo_t s;
 		s.lexema = $1.lexema;
 		if(!buscarSimbolo(s))
+		//if(buscar(s, ambito))
 			msgError(ERRNODECL,$1.nlin,$1.ncol, $1.lexema);
 		else{
 			$$.dir = 	s.dir;
@@ -995,26 +986,6 @@ bool existeSimbolo(const char* simbolo) {
 
 }
 
-bool buscarSimbolo(simbolo_t& simbolo) {    // simbolo debe llegar con el lexema y volvera con todos los atributos
-  
-  std::vector<simbolo_t>::iterator begin_it = ambito->simbolos.begin();
-  std::vector<simbolo_t>::iterator end_it   = ambito->simbolos.end();
-  std::vector<simbolo_t>::iterator it       = std::find_if(begin_it,end_it, find_simbolo(simbolo.lexema)); 
-
-  if(it != end_it)
-  {
-    simbolo.idTipo  = it->idTipo;
-    simbolo.dir   = it->dir;
-
-    #if DEBUG_MODE
-      cout << "buscarSimbolo --> Dir: " << simbolo.dir << "\tTipo: "<< simbolo.tipo << "\n";
-    #endif
-
-    return true;
-  }
-  return false;
-} 
-
 
 bool buscar(simbolo_t s, tabla_simbolos* actual) {
 
@@ -1026,6 +997,24 @@ bool buscar(simbolo_t s, tabla_simbolos* actual) {
 }
 
 
+
+bool buscarSimbolo(simbolo_t& simbolo) {    // simbolo debe llegar con el lexema y volvera con todos los atributos
+  
+  std::vector<simbolo_t>::iterator begin_it = ambito->simbolos.begin();
+  std::vector<simbolo_t>::iterator end_it   = ambito->simbolos.end();
+  std::vector<simbolo_t>::iterator it       = std::find_if(begin_it,end_it, find_simbolo(simbolo.lexema)); 
+
+  if(it != end_it)
+  {
+    simbolo.idTipo  = it->idTipo;
+    simbolo.dir   = it->dir;
+    #if DEBUG_MODE
+      cout << "buscarSimbolo --> Dir: " << simbolo.dir << "\tTipo: "<< simbolo.tipo << "\n";
+    #endif
+    return true;
+  }
+  return false;
+} 
 
 
 int NTemp(){
