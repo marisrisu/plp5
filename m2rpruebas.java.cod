@@ -1,9 +1,9 @@
 mov $7.5 16011
-mov 16011 0
+mov A 0
 mov 0 A
 rtoi
 mov A 16013
-mov 16013 2
+mov A 2
 mov $7.1 16014
 mov 2 A
 itor
@@ -23,7 +23,7 @@ mov A 16026
 mov 2 A
 addi 16026
 mov A 16027
-mov 16027 3
+mov A 3
 mov #2 16030
 mov #2 16028
 mov 3 A
@@ -32,15 +32,12 @@ mov A 16029
 mov 16029 A
 divi 16030
 mov A 16031
-mov 16031 4
-mov 4 A
+mov A 4
 wri A 
 wrl
 L1
-mov 0 A
 wrr A 
 wrl
-mov 2 A
 wri A 
 wrl
 halt

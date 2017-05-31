@@ -358,7 +358,7 @@ Instr : pyc_ {
 			$$.cod = $3.cod;
 			if($1.tipo == REAL && $3.tipo == ENTERO)
 				$$.cod += "itor\n";
-			$$.cod += "mov A " + IntToString($1.dir) + "\n";
+			$$.cod += "mov " + IntToString($3.dir) + " " + IntToString($1.dir) + "\n";
 			//$$.cod += $1.cod;
 			$$.dir = $3.dir;
 		}
@@ -368,9 +368,14 @@ Instr : pyc_ {
 		$$.tipo = $7.tipo;
 		$$.dir = $7.dir;
 		if($7.tipo == ENTERO)
-			$$.cod =$7.cod + "wri A \n";
+			$$.cod = $7.cod
+					+ "mov " + IntToString($7.dir) + " A\n"
+					+ "wri A \n";
 		else
-			$$.cod =$7.cod + "wrr A \n";
+			$$.cod = $7.cod
+					+ "mov " + IntToString($7.dir) + " A\n"
+					+ "wrr A \n";
+
 		$$.cod += "wrl\n";
 	}
 	| system_ punto_ out_ punto_ print_ pari_ Expr pard_ pyc_ {
@@ -378,65 +383,81 @@ Instr : pyc_ {
 		$$.tipo = $7.tipo;
 		$$.dir = $7.dir;
 		if($7.tipo == ENTERO)
-			$$.cod =$7.cod +"wri A \n";
+			$$.cod = $7.cod
+					+ "mov " + IntToString($7.dir) + " A\n"
+					+ "wri A \n";
 		else
-			$$.cod =$7.cod +"wrr A \n";
+			$$.cod = $7.cod
+					+ "mov " + IntToString($7.dir) + " A\n"
+					+"wrr A \n";
 	}
 	| if_ pari_ Expr pard_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 6...\n";	
 		$$.cod = $3.cod;
-		//$$.cod += "mov " + IntToString($3.dir) + " A\n";
+		$$.cod += "mov " + IntToString($3.dir) + " A\n";
 		$$.cod += "jz L" + IntToString(++ptr_label) + "\n";
 		$$.cod += $5.cod;
-		$$.cod += "L" + IntToString(ptr_label) + " ";
+		$$.cod += "L" + IntToString(ptr_label) + "\n";
 		
 	}
 	| if_ pari_ Expr pard_ Instr else_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 7...\n";	
 		$$.cod = $3.cod;
-		//$$.cod += "mov " + IntToString($3.dir) + " A\n";
+		$$.cod += "mov " + IntToString($3.dir) + " A\n";
 		$$.cod += "jz L" + IntToString(++ptr_label) + "\n";
 		$$.cod += $5.cod;
-		$$.cod += "jmp " + IntToString(++ptr_label) +"\n";
+		$$.cod += "jmp L" + IntToString(++ptr_label) +"\n";
 		$$.cod += "L" + IntToString(ptr_label - 1) + " " + $7.cod;
-		$$.cod += "L" + IntToString(ptr_label) + " ";
+		$$.cod += "L" + IntToString(ptr_label) + "\n";
 	}
 	| while_ pari_ Expr pard_ Instr {
 		if(DEBUG) std::cout << " - Leído Instr 8...\n";	
-		$$.cod = "L"+ IntToString(++ptr_label) + $3.cod;
+		$$.cod = "L"+ IntToString(++ptr_label) + " " + $3.cod;
 		$$.cod += "mov " + IntToString($3.dir) + " A\n";
 		$$.cod += "jz L" + IntToString(++ptr_label) + "\n";
 		$$.cod += $5.cod;
 		$$.cod += "jmp L" + IntToString(ptr_label - 1) +"\n";
-		$$.cod += "L" + IntToString(ptr_label) + " ";
+		$$.cod += "L" + IntToString(ptr_label) + "\n";
 };
 
 Expr : Expr or_ { if($1.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.lexema); } EConj {
 		if(DEBUG) std::cout << " - Leído Expr 1...\n";	
 		if($4.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.lexema);
 		$$.tipo = BOOLEANO;
+		ptr_tmp = NTemp();
+		$$.dir = ptr_tmp;
 		$$.cod = $4.cod
-					+ "ori " + IntToString($1.dir) + "\n";
+					+ "mov " + IntToString($4.dir) + " A\n"
+					+ "ori " + IntToString($1.dir) + "\n"
+					+ "mov A " + IntToString(ptr_tmp) + "\n";
 	}
 	| EConj {
 		if(DEBUG) std::cout << " - Leído Expr 2...\n";
-		$$.tipo = $1.tipo;
-		$$.dir 	= $1.dir;
-		$$.cod 	= $1.cod;
+		$$.tipo 	= $1.tipo;
+		$$.dir 		= $1.dir;
+		$$.cod 		= $1.cod;
+		$$.dBase 	= $1.dBase;
+		$$.esArray = $1.esArray;
 	};
 
 EConj : EConj and_ { if($1.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.lexema); } ERel {
 		if(DEBUG) std::cout << " - Leído EConj 1...\n";
 		if($4.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $2.lexema);
 		$$.tipo = BOOLEANO;
+		ptr_tmp = NTemp();
+		$$.dir = ptr_tmp;
 		$$.cod = $4.cod
-					+ "andi " + IntToString($1.dir) + "\n";
+					+ "mov " + IntToString($4.dir) + " A\n"
+					+ "andi " + IntToString($1.dir) + "\n"
+					+ "mov A " + IntToString(ptr_tmp) + "\n";
 	}
 	| ERel {
 		if(DEBUG) std::cout << " - Leído EConj 2...\n";
-		$$.tipo = $1.tipo;
-		$$.dir 	= $1.dir;
-		$$.cod 	= $1.cod;
+		$$.tipo 	= $1.tipo;
+		$$.dir 		= $1.dir;
+		$$.cod 		= $1.cod;
+		$$.dBase 	= $1.dBase;
+		$$.esArray = $1.esArray;
 	};
 
 ERel : Esimple relop_ { if($1.tipo != ENTERO && $1.tipo != REAL && $1.tipo != BOOLEANO) msgError(ERR_NUM, nlin, ncol, $2.lexema); } Esimple {
@@ -444,52 +465,53 @@ ERel : Esimple relop_ { if($1.tipo != ENTERO && $1.tipo != REAL && $1.tipo != BO
 		if($4.tipo != ENTERO && $4.tipo != REAL && $1.tipo != BOOLEANO) msgError(ERR_NUM, nlin, ncol, $2.lexema);
 		$$.tipo = BOOLEANO;
 		ptr_tmp = NTemp();
+		$$.dir = ptr_tmp;
 
 		if($1.tipo == $4.tipo) {
 			if($1.tipo == ENTERO) {
 				$$.cod = $4.cod
-						+ "mov A " + IntToString(ptr_tmp) + "\n"
-						//+ "mov " + IntToString($1.dir) + " A\n"
 						+ $1.cod
-						+ relopToM2R($2.lexema, ENTERO) + IntToString(ptr_tmp) + "\n";
+						+ "mov " + IntToString($1.dir) + " A\n"
+						+ relopToM2R($2.lexema, ENTERO) + IntToString($4.dir) + "\n"
+						+ "mov A " + IntToString(ptr_tmp) + "\n";
 			} else if($1.tipo == REAL) {
 				$$.cod = $4.cod
-						+ "mov A " + IntToString(ptr_tmp) + "\n"
-						//+ "mov " + IntToString($1.dir) + " A\n"
 						+ $1.cod
-						+ relopToM2R($2.lexema, REAL) + IntToString(ptr_tmp) + "\n";
-						//+ relopToM2R($2.lexema, REAL) +  IntToString($1.dir) + "\n";
+						+ "mov " + IntToString($1.dir) + " A\n"
+						+ relopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
+						+ "mov A " + IntToString(ptr_tmp) + "\n";
 			} else {
 				$$.cod = $4.cod
-						+ "mov A " + IntToString(ptr_tmp) + "\n"
-						//+ "mov " + IntToString($1.dir) + " A\n"
 						+ $1.cod
-						+ relopToM2R($2.lexema, BOOLEANO) + IntToString(ptr_tmp) + "\n";
+						+ "mov " + IntToString($1.dir) + " A\n"
+						+ relopToM2R($2.lexema, BOOLEANO) + IntToString($4.dir) + "\n"
+						+ "mov A " + IntToString(ptr_tmp) + "\n";
 			}
 		} else if($1.tipo != BOOLEANO && $4.tipo != BOOLEANO) {
 			if($1.tipo == ENTERO) {
 				$$.cod = $4.cod
-						+ "mov A " + IntToString(ptr_tmp) + "\n"
-						//+ "mov " + IntToString($1.dir) + " A\n"
 						+ $1.cod
+						+ "mov " + IntToString($1.dir) + " A\n"
 						+ "itor\n"
-						+ relopToM2R($2.lexema, REAL) + IntToString(ptr_tmp) + "\n";
+						+ relopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
+						+ "mov A " + IntToString(ptr_tmp) + "\n";
 			} else {
 				$$.cod = $4.cod
-						+ "itor\n"
-						+ "mov A " + IntToString(ptr_tmp) + "\n"
-						//+ "mov " + IntToString($1.dir) + " A\n"
 						+ $1.cod
-						+ relopToM2R($2.lexema, REAL) + IntToString(ptr_tmp) + "\n";
+						+ "mov " + IntToString($4.dir) + " A\n"
+						+ "itor\n"
+						+ relopToM2R($2.lexema, REAL) + IntToString($1.dir) + "\n"
+						+ "mov A " + IntToString(ptr_tmp) + "\n";
 			}
-		} else 
+		} else
 			msgError(ERR_TIPOS, nlin, ncol, $2.lexema);
 	}
 	| Esimple {
 		if(DEBUG) std::cout << " - Leído ERel 2...\n";
-		$$.tipo = $1.tipo;
-		$$.dir 	= $1.dir;
-		$$.cod 	= $1.cod;
+		$$.tipo 	= $1.tipo;
+		$$.dir 		= $1.dir;
+		$$.cod 		= $1.cod;
+		$$.dBase 	= $1.dBase;
 		$$.esArray = $1.esArray;
 	};
 
@@ -497,48 +519,50 @@ Esimple : Esimple addop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR
 		if(DEBUG) std::cout << " - Leído Esimple 1...\n";
 		if($4.tipo != ENTERO && $4.tipo != REAL) msgError(ERR_NUM, nlin, ncol, $2.lexema);
 		ptr_tmp = NTemp();
+		$$.dir = ptr_tmp;
 
 		if($1.tipo == $4.tipo) {
 			$$.tipo = $4.tipo;
 
 			if($1.tipo == ENTERO) {
 				$$.cod = $4.cod
-						+ "mov A " + IntToString(ptr_tmp) + "\n"
-						//+ "mov " + IntToString($1.dir) + " A\n"
 						+ $1.cod
-						+ addopToM2R($2.lexema, ENTERO) + IntToString(ptr_tmp) + "\n";
+						+ "mov " + IntToString($1.dir) + " A\n"
+						+ addopToM2R($2.lexema, ENTERO) + IntToString($4.dir) + "\n"
+						+ "mov A " + IntToString(ptr_tmp) + "\n";
 			} else {
 				$$.cod = $4.cod
-						+ "mov A " + IntToString(ptr_tmp) + "\n"
-						//+ "mov " + IntToString($1.dir) + " A\n"
 						+ $1.cod
-						+ addopToM2R($2.lexema, REAL) + IntToString(ptr_tmp) + "\n";
+						+ "mov " + IntToString($1.dir) + " A\n"
+						+ addopToM2R($2.lexema, ENTERO) + IntToString($4.dir) + "\n"
+						+ "mov A " + IntToString(ptr_tmp) + "\n";
 			}
 		} else {
 			$$.tipo = REAL;
 
 			if($1.tipo == ENTERO) {
 				$$.cod = $4.cod
-						+ "mov A " + IntToString(ptr_tmp) + "\n"
-						//+ "mov " + IntToString($1.dir) + " A\n"
 						+ $1.cod
+						+ "mov " + IntToString($1.dir) + " A\n"
 						+ "itor\n"
-						+ addopToM2R($2.lexema, REAL) + IntToString(ptr_tmp) + "\n";
+						+ addopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
+						+ "mov A " + IntToString(ptr_tmp) + "\n";
 			} else {
 				$$.cod = $4.cod
-						+ "itor\n"
-						+ "mov A " + IntToString(ptr_tmp) + "\n"
-						//+ "mov " + IntToString($1.dir) + " A\n"
 						+ $1.cod
-						+ addopToM2R($2.lexema, REAL) + IntToString(ptr_tmp) + "\n";
+						+ "mov " + IntToString($4.dir) + " A\n"
+						+ "itor\n"
+						+ addopToM2R($2.lexema, REAL) + IntToString($1.dir) + "\n"
+						+ "mov A " + IntToString(ptr_tmp) + "\n";
 			}
 		}
 	}
 	| Term {
 		if(DEBUG) std::cout << " - Leído Esimple 2...\n";
-		$$.tipo = $1.tipo;
-		$$.dir 	= $1.dir;
-		$$.cod 	= $1.cod;
+		$$.tipo 	= $1.tipo;
+		$$.dir 		= $1.dir;
+		$$.cod 		= $1.cod;
+		$$.dBase 	= $1.dBase;
 		$$.esArray = $1.esArray;
 	};
 
@@ -546,39 +570,41 @@ Term : Term mulop_ { if($1.tipo != ENTERO && $1.tipo != REAL) msgError(ERR_NUM, 
 		if(DEBUG) std::cout << " - Leído Term 1...\n";
 		if($4.tipo != ENTERO && $4.tipo != REAL) msgError(ERR_NUM, nlin, ncol, $2.lexema);
 		ptr_tmp = NTemp();
+		$$.dir = ptr_tmp;
 
 		if($1.tipo == $4.tipo) {
 			$$.tipo = $4.tipo;
 
 			if($1.tipo == ENTERO) {
 				$$.cod = $4.cod
-						+ "mov A " + IntToString(ptr_tmp) + "\n"
-						//+ "mov " + IntToString($1.dir) + " A\n"
 						+ $1.cod
-						+ mulopToM2R($2.lexema, ENTERO) + IntToString(ptr_tmp) + "\n";
+						+ "mov " + IntToString($1.dir) + " A\n"
+						+ mulopToM2R($2.lexema, ENTERO) + IntToString($4.dir) + "\n"
+						+ "mov A " + IntToString(ptr_tmp) + "\n";
 			} else {
 				$$.cod = $4.cod
-						+ "mov A " + IntToString(ptr_tmp) + "\n"
-						//+ "mov " + IntToString($1.dir) + " A\n"
 						+ $1.cod
-						+ mulopToM2R($2.lexema, REAL) + IntToString(ptr_tmp) + "\n";
+						+ "mov " + IntToString($1.dir) + " A\n"
+						+ mulopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
+						+ "mov A " + IntToString(ptr_tmp) + "\n";
 			}
 		} else {
 			$$.tipo = REAL;
 
 			if($1.tipo == ENTERO) {
 				$$.cod = $4.cod
-						+ "mov A " + IntToString(ptr_tmp) + "\n"
 						+ $1.cod
+						+ "mov " + IntToString($1.dir) + " A\n"
 						+ "itor\n"
-						+ mulopToM2R($2.lexema, REAL) + IntToString(ptr_tmp) + "\n";
+						+ mulopToM2R($2.lexema, REAL) + IntToString($4.dir) + "\n"
+						+ "mov A " + IntToString(ptr_tmp) + "\n";
 			} else {
 				$$.cod = $4.cod
-						+ "itor\n"
-						+ "mov A " + IntToString(ptr_tmp) + "\n"
-						//+ "mov " + IntToString($1.dir) + " A\n"
 						+ $1.cod
-						+ mulopToM2R($2.lexema, REAL) + IntToString(ptr_tmp) + "\n";
+						+ "mov " + IntToString($4.dir) + " A\n"
+						+ "itor\n"
+						+ mulopToM2R($2.lexema, REAL) + IntToString($1.dir) + "\n"
+						+ "mov A " + IntToString(ptr_tmp) + "\n";
 			}
 		}
 	}
@@ -628,28 +654,28 @@ Factor : Ref {
 		ptr_tmp = NTemp();
 		$$.tipo = ENTERO;
 		$$.dir 	= ptr_tmp;
-		$$.cod 	= std::string("mov #") + $1.lexema + " A\n";
+		$$.cod 	= std::string("mov #") + $1.lexema + " " + IntToString(ptr_tmp) + "\n";
 	}
 	| nreal {
 		if(DEBUG) std::cout << " - Leído Factor 5...\n";
 		ptr_tmp = NTemp();
 		$$.tipo = REAL;
 		$$.dir 	= ptr_tmp;
-		$$.cod 	= std::string("mov $") + $1.lexema + " A\n";
+		$$.cod 	= std::string("mov $") + $1.lexema + " " + IntToString(ptr_tmp) + "\n";
 	}
 	| true_ {
 		if(DEBUG) std::cout << " - Leído Factor 6...\n";
 		ptr_tmp = NTemp();
 		$$.tipo = BOOLEANO;
 		$$.dir 	= ptr_tmp;
-		$$.cod 	= "mov #1 A\n";
+		$$.cod 	= "mov #1 " + IntToString(ptr_tmp) + "\n";
 	}
 	| false_ {
 		if(DEBUG) std::cout << " - Leído Factor 7...\n";
 		ptr_tmp = NTemp();
 		$$.tipo = BOOLEANO;
 		$$.dir 	= ptr_tmp;
-		$$.cod 	= "mov #0 A\n";
+		$$.cod 	= "mov #0 " + IntToString(ptr_tmp) + "\n";
 	}
 	| pari_ Expr pard_ {
 		if(DEBUG) std::cout << " - Leído Factor 8...\n";
@@ -660,8 +686,13 @@ Factor : Ref {
 	| not_ Factor {
 		if(DEBUG) std::cout << " - Leído Factor 9...\n";
 		if($2.tipo != BOOLEANO) msgError(ERR_OPNOBOOL, nlin, ncol, $1.lexema);
+		ptr_tmp = NTemp();
+		$$.dir = ptr_tmp;
 		$$.tipo = $2.tipo;
-		$$.cod 	= $2.cod + "noti\n";
+		$$.cod 	= $2.cod
+				+ "mov " + IntToString($2.dir) + " A\n"
+				+ "noti\n"
+				+ "mov A " + IntToString(ptr_tmp) + "\n";
 	}
 	| pari_ Tipo { if(!esBase($2.tipo)) msgError(ERR_TIPOS,nlin,ncol,$2.lexema); } pard_ Factor {
 		if(DEBUG) std::cout << " - Leído Factor 10...\n";
@@ -680,26 +711,38 @@ Factor : Ref {
 			if($5.tipo == BOOLEANO) {
 				if($2.tipo == ENTERO) {
 					$$.cod 	= $5.cod
-								+ "ori #0\n";
+								+ "mov " + IntToString($5.dir) + " A\n"
+								+ "ori #0\n"
+								+ "mov A " + IntToString(ptr_tmp) + "\n";
 				} else {
 					$$.cod 	= $5.cod
-								+ "orr #0\n";
+								+ "mov " + IntToString($5.dir) + " A\n"
+								+ "orr #0\n"
+								+ "mov A " + IntToString(ptr_tmp) + "\n";
 				}
 			} else if($5.tipo == ENTERO) {
 				if($2.tipo == BOOLEANO) {
 					$$.cod 	= $5.cod
-								+ "andi #1\n";
+								+ "mov " + IntToString($5.dir) + " A\n"
+								+ "andi #1\n"
+								+ "mov A " + IntToString(ptr_tmp) + "\n";
 				} else {
 					$$.cod 	= $5.cod
-								+ "itor\n";
+								+ "mov " + IntToString($5.dir) + " A\n"
+								+ "itor\n"
+								+ "mov A " + IntToString(ptr_tmp) + "\n";
 				}
 			} else {
 				if($2.tipo == BOOLEANO) {
 					$$.cod 	= $5.cod
-								+ "andr #1\n";
+								+ "mov " + IntToString($5.dir) + " A\n"
+								+ "andr #1\n"
+								+ "mov A " + IntToString(ptr_tmp) + "\n";
 				} else {
 					$$.cod 	= $5.cod
-								+ "rtoi\n";
+								+ "mov " + IntToString($5.dir) + " A\n"
+								+ "rtoi\n"
+								+ "mov A " + IntToString(ptr_tmp) + "\n";
 				}
 			}
 		}
@@ -711,11 +754,13 @@ Ref : id {
 		if(!buscar(s,ambito))
 			msgError(ERRNODECL,$1.nlin,$1.ncol, $1.lexema);
 		else{
+			$$.tipo = s.idTipo;
+
 			if(s.esArray) {
 				ptr_tmp 	= NTemp();
 				$$.dir = ptr_tmp;
-				//$$.dBase	= getTBaseVector(s.idTipo);
-				$$.dBase = $1.dir;
+				$$.dBase	= getTBaseVector(s.idTipo);
+				//$$.dBase = $1.dir;
 				$$.esArray = true;
 				$$.cod 		= "mov #0 " + IntToString(ptr_tmp) + "\n";
 			}
@@ -723,22 +768,25 @@ Ref : id {
 				$$.dir = s.dir;
 				$$.tipo = s.idTipo;
 				if(DEBUG) std::cout << "Ref -> id, símbolo [lex]" << s.lexema << "\t[dir]"<< s.dir << "\t[tipo]" << s.idTipo << "\n";
-				$$.cod = "mov "+ IntToString(s.dir) + " A\n";
+				//$$.cod = "mov "+ IntToString(s.dir) + " A\n";
 				$$.esArray = false;
 			}
 		}
 	}
-	| Ref cori_ {if($1.esArray) msgError(ERRFALTAN,nlin,ncol,""); }
-	  Esimple {if(!esBase($4.tipo)) msgError(ERR_EXP_ENT,nlin,ncol,"");} cord_ {
+	| Ref cori_ { /*if(!$1.esArray) msgError(ERRFALTAN,nlin,ncol,"");*/ }
+	  Esimple  cord_ {
 		if(DEBUG) std::cout << " - Leído Ref 2...\n";
-		if($1.tipo == getTBaseVector($1.dBase)) msgError(ERRSOBRAN,nlin,ncol,"");
+		if(!esBase($4.tipo)) msgError(ERR_EXP_ENT,nlin,ncol,"");
 		else {
+			tipo_t t;
+			buscarTipo($1.tipo, t);
+			
+
 			$$.tipo = tipoBase($1.tipo);
 			ptr_tmp = NTemp();
 			$$.dir = ptr_tmp;
 			$$.dBase = $1.dBase;
-			tipo_t t;
-			buscarTipo($1.tipo, t);
+			$$.esArray = $1.esArray;
 			$$.cod = $1.cod + $4.cod
 					 + "mov " + IntToString($1.dir) + " A\n" 
 					 + "muli #" + IntToString(t.size) + "\n"
@@ -934,7 +982,9 @@ void crear_ambito(const char* nombre)
 }
 
 int tipoBase(int tipo){
-	return 1;
+	tipo_t t;
+	buscarTipo(tipo, t);
+	return t.tipo_base;
 }
 
 int buscarDir(const char* lexema){

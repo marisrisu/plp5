@@ -1,0 +1,111 @@
+mov #0 16021
+mov 16021 0
+mov #0 16022
+mov 16022 1
+L3 mov #4 16023
+mov 0 A
+lssi 16023
+mov A 16024
+mov 16024 A
+jz L4
+mov #0 16025
+mov 16025 1
+L1 mov #4 16026
+mov 1 A
+lssi 16026
+mov A 16027
+mov 16027 A
+jz L2
+rdr 16031
+mov 16031 16030
+mov #1 16032
+mov 1 A
+addi 16032
+mov A 16033
+mov 16033 1
+jmp L1
+L2
+mov #1 16034
+mov 0 A
+addi 16034
+mov A 16035
+mov 16035 0
+jmp L3
+L4
+mov 0 A
+eqli 1
+mov A 16036
+mov 16036 A
+jz L9
+rdi 16047
+mov 16047 24
+mov #0 16048
+mov 16048 0
+mov #0 16049
+itor
+mov 16049 23
+L7 mov #4 16050
+mov 0 A
+lssi 16050
+mov A 16051
+mov 16051 A
+jz L8
+rdr 16031
+mov 16031 16030
+mov #1 16032
+mov 1 A
+addi 16032
+mov A 16033
+mov 16033 1
+mov #0 16052
+mov 16052 1
+mov #0 16053
+itor
+mov 16053 22
+L5 mov #4 16054
+mov 1 A
+lssi 16054
+mov A 16055
+mov 16055 A
+jz L6
+mov #0 16056
+mov 16056 A
+muli #4
+addi 0
+mov 16057 A
+muli #4
+addi 1
+mov 22 A
+addi 16058
+mov A 16059
+mov 16059 22
+mov #1 16060
+mov 1 A
+addi 16060
+mov A 16061
+mov 16061 1
+jmp L5
+L6
+mov 22 A
+wrr A 
+wrl
+mov #1 16062
+mov 0 A
+addi 16062
+mov A 16063
+mov 16063 0
+mov 23 A
+addi 22
+mov A 16064
+mov 16064 23
+jmp L7
+L8
+mov 24 A
+itor
+divr 23
+mov A 16065
+mov 16065 A
+wrr A 
+wrl
+L9
+halt

@@ -1,0 +1,150 @@
+mov #4 16020
+mov #5 16018
+mov #2 16017
+mov 16017 A
+muli 16018
+mov A 16019
+mov 16019 A
+divi 16020
+mov A 16021
+mov #3 16015
+mov #1 16014
+mov 16014 A
+subi 16015
+mov A 16016
+mov 16016 A
+addi 16021
+mov A 16022
+mov 16022 0
+mov 0 16035
+mov #1 16049
+mov 0 A
+addi 16049
+mov A 16050
+mov 16050 16048
+mov #2 16064
+mov 0 A
+addi 16064
+mov A 16065
+mov 16065 16063
+mov #3 16079
+mov 0 A
+addi 16079
+mov A 16080
+mov 16080 16078
+mov 0 A
+wri A 
+wrl
+mov #0 16122
+mov #0 16123
+mov 16122 A
+muli #1
+addi 16123
+mov #0 16125
+mov 16124 A
+muli #2
+addi 16125
+mov #0 16127
+mov 16126 A
+muli #1
+addi 16127
+mov #0 16129
+mov 16128 A
+muli #1
+addi 16129
+mov #1 16131
+mov 16130 A
+muli #2
+addi 16131
+mov #0 16133
+mov 16132 A
+muli #1
+addi 16133
+mov #0 16108
+mov #0 16109
+mov 16108 A
+muli #1
+addi 16109
+mov #1 16111
+mov 16110 A
+muli #2
+addi 16111
+mov #0 16113
+mov 16112 A
+muli #1
+addi 16113
+mov #0 16115
+mov 16114 A
+muli #1
+addi 16115
+mov #0 16117
+mov 16116 A
+muli #2
+addi 16117
+mov #0 16119
+mov 16118 A
+muli #1
+addi 16119
+mov #0 16094
+mov #0 16095
+mov 16094 A
+muli #1
+addi 16095
+mov #0 16097
+mov 16096 A
+muli #2
+addi 16097
+mov #0 16099
+mov 16098 A
+muli #1
+addi 16099
+mov #0 16101
+mov 16100 A
+muli #1
+addi 16101
+mov #0 16103
+mov 16102 A
+muli #2
+addi 16103
+mov #0 16105
+mov 16104 A
+muli #1
+addi 16105
+mov #0 16081
+mov #0 16082
+mov 16081 A
+muli #1
+addi 16082
+mov #1 16084
+mov 16083 A
+muli #2
+addi 16084
+mov #0 16086
+mov 16085 A
+muli #1
+addi 16086
+mov #0 16088
+mov 16087 A
+muli #1
+addi 16088
+mov #1 16090
+mov 16089 A
+muli #2
+addi 16090
+mov #0 16092
+mov 16091 A
+muli #1
+addi 16092
+mov 16093 A
+addi 16106
+mov A 16107
+mov 16107 A
+addi 16120
+mov A 16121
+mov 16121 A
+addi 16134
+mov A 16135
+mov 16135 A
+wri A 
+wrl
+halt
